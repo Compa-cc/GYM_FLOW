@@ -86,6 +86,60 @@
   .tag-muscle { background: #ff4e6a18; color: var(--accent2); border: 1px solid #ff4e6a33; }
   .tag-level { background: #ffffff12; color: var(--muted); border: 1px solid var(--border); }
 
+/* --- VISTAS PREVIAS COMPACTAS --- */
+
+.exercise-card {
+    background: #15151e;
+    padding: 12px; /* Espaciado interno reducido */
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--neon);
+    display: flex; /* Alineación flexible */
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ex-img {
+    width: 100%;
+    height: 140px; /* Altura fija reducida para la vista previa */
+    object-fit: cover; /* Evita que la imagen se estire */
+    border-radius: 8px;
+    cursor: pointer;
+    background: #1a1a24;
+    transition: transform 0.2s ease;
+}
+
+.ex-img:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.exercise-card h3 {
+    font-size: 1.1rem; /* Título más discreto */
+    margin: 0;
+    color: var(--neon);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.exercise-card p {
+    font-size: 0.85rem; /* Texto de descripción pequeño para ahorrar espacio */
+    line-height: 1.4;
+    margin: 0;
+    color: #ccc;
+}
+
+.ex-meta {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--pink);
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #222;
+    padding-top: 8px;
+    margin-top: 4px;
+}
+
   .ex-image-wrap { position: relative; width: 100%; background: #0d0d16; overflow: hidden; cursor: pointer; }
   .ex-image-wrap img { width: 100%; display: block; object-fit: cover; transition: transform .3s ease; }
   .ex-image-wrap:active img { transform: scale(1.02); }
