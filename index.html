@@ -1,556 +1,262 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>GYM FLOW</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --card: #1c1c28;
-    --accent: #f5ff4e;
-    --accent2: #ff4e6a;
-    --text: #f0f0f8;
-    --muted: #6b6b88;
-    --border: #2a2a3d;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYM FLOW | Entrenador Personal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card: #15151e;
+            --neon: #f5ff4e;
+            --pink: #ff4e6a;
+            --text: #ffffff;
+        }
 
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
-  .screen.active { display: flex; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* HOME */
-  #s-home { background: var(--bg); position: relative; overflow: hidden; align-items: center; justify-content: center; }
-  .home-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 80%, #f5ff4e18 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #ff4e6a14 0%, transparent 55%); pointer-events: none; }
-  .home-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.3; pointer-events: none; }
-  .home-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 40px 24px; text-align: center; }
-  .logo-badge { background: var(--accent); color: var(--bg); font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 3px; padding: 5px 14px; border-radius: 100px; animation: pulse 2.5s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 #f5ff4e55}50%{box-shadow:0 0 0 12px #f5ff4e00} }
-  .home-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px,22vw,100px); line-height: 0.85; letter-spacing: -2px; }
-  .home-title span { color: var(--accent); }
-  .home-sub { font-size: 15px; color: var(--muted); line-height: 1.6; max-width: 280px; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-  /* BUTTONS */
-  .btn-primary { background: var(--accent); color: var(--bg); border: none; font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; padding: 18px 48px; border-radius: 4px; cursor: pointer; width: 100%; max-width: 300px; transition: transform .15s; }
-  .btn-primary:active { transform: scale(0.97); }
-  .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-  .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; padding: 16px 20px; border-radius: 4px; cursor: pointer; flex: 1; transition: background .15s; }
-  .btn-secondary:active { background: var(--border); }
+        h1, h2, h3 { font-family: 'Bebas Neue', cursive; letter-spacing: 1px; }
 
-  /* SELECT */
-  #s-select { background: var(--bg); }
-  .top-bar { display: flex; align-items: center; padding: 52px 20px 16px; gap: 12px; }
-  .back-btn { width: 40px; height: 40px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 18px; transition: background .15s; }
-  .back-btn:active { background: var(--border); }
-  .top-bar-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; }
-  .select-body { flex: 1; overflow-y: auto; padding: 0 20px 120px; }
-  .section-label { font-size: 11px; letter-spacing: 2.5px; color: var(--muted); text-transform: uppercase; margin: 24px 0 12px; }
-  .parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .part-card { background: var(--card); border: 2px solid var(--border); border-radius: 14px; padding: 18px 14px; cursor: pointer; transition: all .18s; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; position: relative; overflow: hidden; }
-  .part-card .emoji { font-size: 28px; }
-  .part-card .part-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.5px; line-height: 1.1; }
-  .part-card .part-count { font-size: 11px; color: var(--muted); }
-  .part-card.selected { border-color: var(--accent); background: #f5ff4e12; }
-  .part-card.selected::after { content: '✓'; position: absolute; top: 10px; right: 12px; background: var(--accent); color: var(--bg); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; line-height: 22px; text-align: center; }
-  .part-card:active { transform: scale(0.97); }
-  .count-row { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; }
-  .count-label { font-size: 15px; font-weight: 500; }
-  .count-controls { display: flex; align-items: center; gap: 16px; }
-  .count-btn { width: 36px; height: 36px; background: var(--border); border: none; border-radius: 8px; color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
-  .count-btn:active { background: var(--accent); color: var(--bg); }
-  .count-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; min-width: 36px; text-align: center; }
-  .bottom-cta { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px 32px; background: linear-gradient(to top, var(--bg) 60%, transparent); z-index: 10; }
-  .bottom-cta .btn-primary { max-width: 100%; }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
 
-  /* WORKOUT */
-  #s-workout { background: var(--bg); }
-  .workout-header { padding: 52px 20px 0; display: flex; flex-direction: column; gap: 4px; }
-  .workout-meta { display: flex; align-items: center; justify-content: space-between; }
-  .workout-tag { font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
-  .workout-progress-text { font-size: 13px; color: var(--muted); }
-  .progress-bar-wrap { height: 4px; background: var(--border); border-radius: 100px; margin-top: 12px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 100px; transition: width .4s ease; }
-  .workout-body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-bottom: 140px; }
-  .ex-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; animation: slideUp 0.35s ease; }
-  @keyframes slideUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)} }
-  .ex-card-top { padding: 20px; display: flex; gap: 14px; align-items: flex-start; }
-  .ex-number { font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--border); flex-shrink: 0; user-select: none; }
-  .ex-info { flex: 1; }
-  .ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.5px; line-height: 1.1; margin-bottom: 4px; }
-  .ex-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .ex-tag { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; border-radius: 100px; font-weight: 500; }
-  .tag-equip { background: #f5ff4e18; color: var(--accent); border: 1px solid #f5ff4e33; }
-  .tag-muscle { background: #ff4e6a18; color: var(--accent2); border: 1px solid #ff4e6a33; }
-  .tag-level { background: #ffffff12; color: var(--muted); border: 1px solid var(--border); }
+        /* Pantallas */
+        .screen { display: none; min-height: 100vh; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
 
-/* --- VISTAS PREVIAS COMPACTAS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.exercise-card {
-    background: #15151e;
-    padding: 12px; /* Espaciado interno reducido */
-    border-radius: 12px;
-    margin-bottom: 12px;
-    border-left: 3px solid var(--neon);
-    display: flex; /* Alineación flexible */
-    flex-direction: column;
-    gap: 8px;
-}
+        /* Estilos Home */
+        #s-home { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .logo { font-size: 4rem; color: var(--neon); margin-bottom: 10px; }
+        
+        /* Botones */
+        .btn {
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Bebas Neue';
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
 
-.ex-img {
-    width: 100%;
-    height: 140px; /* Altura fija reducida para la vista previa */
-    object-fit: cover; /* Evita que la imagen se estire */
-    border-radius: 8px;
-    cursor: pointer;
-    background: #1a1a24;
-    transition: transform 0.2s ease;
-}
+        /* Selección de Zonas */
+        .grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .chip {
+            background: #1a1a24;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .chip.selected { border-color: var(--neon); background: #252535; }
 
-.ex-img:hover {
-    transform: scale(1.02);
-    filter: brightness(1.1);
-}
+        /* --- TARJETAS COMPACTAS (Actualizado) --- */
+        .exercise-card {
+            background: var(--card);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--neon);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-.exercise-card h3 {
-    font-size: 1.1rem; /* Título más discreto */
-    margin: 0;
-    color: var(--neon);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
+        .ex-img {
+            width: 100%;
+            height: 140px; /* Tamaño reducido solicitado */
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #1a1a24;
+            transition: transform 0.2s;
+        }
 
-.exercise-card p {
-    font-size: 0.85rem; /* Texto de descripción pequeño para ahorrar espacio */
-    line-height: 1.4;
-    margin: 0;
-    color: #ccc;
-}
+        .ex-img:hover { transform: scale(1.02); filter: brightness(1.1); }
 
-.ex-meta {
-    font-size: 0.75rem;
-    font-weight: bold;
-    color: var(--pink);
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid #222;
-    padding-top: 8px;
-    margin-top: 4px;
-}
+        .exercise-card h3 { font-size: 1.2rem; color: var(--neon); margin: 0; }
+        .exercise-card p { font-size: 0.85rem; color: #ccc; margin: 0; }
 
-  .ex-image-wrap { position: relative; width: 100%; background: #0d0d16; overflow: hidden; cursor: pointer; }
-  .ex-image-wrap img { width: 100%; display: block; object-fit: cover; transition: transform .3s ease; }
-  .ex-image-wrap:active img { transform: scale(1.02); }
-  .img-placeholder { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; background: #0d0d16; color: var(--border); font-size: 13px; letter-spacing: 1px; }
+        .ex-meta {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--pink);
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #222;
+            padding-top: 8px;
+        }
 
-  .lightbox { display: none; position: fixed; inset: 0; background: #000000ee; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-  .lightbox.open { display: flex; }
-  .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
-  .lightbox-close { position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; background: var(--card); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 20px; }
-
-  .ex-desc { padding: 14px 20px 16px; font-size: 13px; color: var(--muted); line-height: 1.65; border-top: 1px solid var(--border); }
-  .ex-sets { display: flex; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); flex-wrap: wrap; }
-  .set-pill { background: var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 500; text-align: center; flex: 1; min-width: 60px; }
-  .set-pill span { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--accent); }
-  .workout-actions { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px 32px; background: linear-gradient(to top, var(--bg) 55%, transparent); display: flex; gap: 10px; }
-  .btn-primary.flex1 { flex: 2; max-width: none; }
-
-  #s-done { align-items: center; justify-content: center; padding: 40px 24px; text-align: center; gap: 28px; background: var(--bg); position: relative; overflow: hidden; }
-  .done-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 60%, #f5ff4e20 0%, transparent 65%); pointer-events: none; }
-  .done-icon { font-size: 72px; animation: pop .5s cubic-bezier(0.34,1.56,0.64,1); }
-  @keyframes pop { from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1} }
-  .done-title { font-family: 'Bebas Neue', sans-serif; font-size: 56px; letter-spacing: 1px; line-height: 0.9; }
-  .done-title span { color: var(--accent); }
-  .done-stats { display: flex; gap: 16px; width: 100%; justify-content: center; }
-  .done-stat { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; text-align: center; flex: 1; max-width: 120px; }
-  .done-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); }
-  .done-stat-lbl { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-</style>
+        /* Lightbox */
+        #lightbox {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #lightbox img { max-width: 100%; max-height: 80vh; border-radius: 8px; }
+    </style>
 </head>
 <body>
 
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <div class="lightbox-close">✕</div>
-  <img id="lightbox-img" src="" alt="">
-</div>
+<div id="lightbox" onclick="this.style.display='none'"><img src="" id="lb-img"></div>
 
-<div id="s-home" class="screen active">
-  <div class="home-bg"></div>
-  <div class="home-grid"></div>
-  <div class="home-content">
-    <div class="logo-badge">✦ ENTRENAMIENTO SIN MÁQUINAS</div>
-    <div class="home-title">GYM<br><span>FLOW</span></div>
-    <p class="home-sub">Elige tus zonas a trabajar y recibe ejercicios aleatorios con colchoneta, bandas, mancuernas y banco.</p>
-    <button class="btn-primary" onclick="go('s-select')">COMENZAR</button>
-  </div>
-</div>
+<div class="container">
+    <!-- PANTALLA INICIO -->
+    <section id="s-home" class="screen active">
+        <h1 class="logo">GYM FLOW</h1>
+        <p style="margin-bottom: 30px; color: #888;">Tu equipo: Mancuernas, Banda y Banco</p>
+        <button class="btn" onclick="nav('s-select')">EMPEZAR ENTRENAMIENTO</button>
+    </section>
 
-<div id="s-select" class="screen">
-  <div class="top-bar">
-    <div class="back-btn" onclick="go('s-home')">←</div>
-    <div class="top-bar-title">Tu sesión</div>
-  </div>
-  <div class="select-body">
-    <div class="section-label">¿Qué quieres trabajar hoy?</div>
-    <div class="parts-grid" id="parts-grid"></div>
-    <div class="section-label">Ejercicios por sesión</div>
-    <div class="count-row">
-      <div class="count-label">Ejercicios</div>
-      <div class="count-controls">
-        <button class="count-btn" onclick="changeCount(-1)">−</button>
-        <div class="count-value" id="count-display">6</div>
-        <button class="count-btn" onclick="changeCount(1)">+</button>
-      </div>
-    </div>
-  </div>
-  <div class="bottom-cta">
-    <button class="btn-primary" id="start-btn" onclick="startWorkout()" disabled>GENERAR RUTINA</button>
-  </div>
-</div>
+    <!-- PANTALLA SELECCIÓN -->
+    <section id="s-select" class="screen">
+        <h2 style="margin-bottom: 20px;">¿QUÉ ENTRENAMOS HOY?</h2>
+        <div class="grid-select" id="muscle-grid">
+            <!-- Se genera con JS -->
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label>CANTIDAD DE EJERCICIOS:</label>
+            <input type="number" id="ex-count" value="6" min="1" max="15" 
+                   style="width: 100%; padding: 10px; background: #1a1a24; color: white; border: none; border-radius: 8px; margin-top: 5px;">
+        </div>
+        <button class="btn" onclick="generateWorkout()">GENERAR RUTINA</button>
+    </section>
 
-<div id="s-workout" class="screen">
-  <div class="workout-header">
-    <div class="workout-meta">
-      <div class="workout-tag" id="workout-tag">Sesión activa</div>
-      <div class="workout-progress-text" id="progress-text">0 / 0</div>
-    </div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-    </div>
-  </div>
-  <div class="workout-body" id="workout-body"></div>
-  <div class="workout-actions">
-    <button class="btn-secondary" onclick="go('s-select')">← VOLVER</button>
-    <button class="btn-primary flex1" onclick="shuffleAgain()">OTRA RUTINA ↻</button>
-  </div>
-</div>
+    <!-- PANTALLA RUTINA -->
+    <section id="s-workout" class="screen">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>TU RUTINA</h2>
+            <button onclick="nav('s-select')" style="background: none; border: none; color: var(--pink); font-weight: bold;">CAMBIAR</button>
+        </div>
+        <div id="workout-list"></div>
+        <button class="btn" onclick="nav('s-done')" style="margin-top: 20px; background: var(--pink); color: white;">TERMINAR SESIÓN</button>
+    </section>
 
-<div id="s-done" class="screen">
-  <div class="done-bg"></div>
-  <div class="done-icon">🔥</div>
-  <div class="done-title">SESIÓN<br><span>LISTA</span></div>
-  <div class="done-stats" id="done-stats"></div>
-  <button class="btn-primary" onclick="shuffleAgain()">OTRA RUTINA ↻</button>
-  <button class="btn-secondary" style="width:100%;max-width:300px;" onclick="go('s-select')">CAMBIAR SELECCIÓN</button>
+    <!-- PANTALLA FINAL -->
+    <section id="s-done" class="screen" style="text-align: center;">
+        <h1 style="font-size: 3rem; color: var(--neon);">¡LOGRADO!</h1>
+        <p>Has completado tu entrenamiento con éxito.</p>
+        <button class="btn" onclick="location.reload()" style="margin-top: 30px;">VOLVER AL INICIO</button>
+    </section>
 </div>
 
 <script>
-const IMAGES = {
-  "Pecho_01": "img/Pecho_01.jpg","Pecho_02": "img/Pecho_02.jpg","Pecho_03": "img/Pecho_03.jpg",
-  "Pecho_04": "img/Pecho_04.jpg","Pecho_05": "img/Pecho_05.jpg","Pecho_06": "img/Pecho_06.jpg",
-  "Pecho_07": "img/Pecho_07.jpg","Pecho_08": "img/Pecho_08.jpg","Pecho_09": "img/Pecho_09.jpg",
-  "Pecho_10": "img/Pecho_10.jpg","Pecho_11": "img/Pecho_11.jpg","Pecho_12": "img/Pecho_12.jpg",
-  "Espalda_01": "img/Espalda_01.jpg","Espalda_02": "img/Espalda_02.jpg","Espalda_03": "img/Espalda_03.jpg",
-  "Espalda_04": "img/Espalda_04.jpg","Espalda_05": "img/Espalda_05.jpg","Espalda_06": "img/Espalda_06.jpg",
-  "Espalda_07": "img/Espalda_07.jpg","Espalda_08": "img/Espalda_08.jpg","Espalda_09": "img/Espalda_09.jpg",
-  "Espalda_10": "img/Espalda_10.jpg","Espalda_11": "img/Espalda_11.jpg","Espalda_12": "img/Espalda_12.jpg",
-  "Hombros_01": "img/Hombros_01.jpg","Hombros_02": "img/Hombros_02.jpg","Hombros_03": "img/Hombros_03.jpg",
-  "Hombros_04": "img/Hombros_04.jpg","Hombros_05": "img/Hombros_05.jpg","Hombros_06": "img/Hombros_06.jpg",
-  "Hombros_07": "img/Hombros_07.jpg","Hombros_08": "img/Hombros_08.jpg","Hombros_09": "img/Hombros_09.jpg",
-  "Hombros_10": "img/Hombros_10.jpg","Hombros_11": "img/Hombros_11.jpg","Hombros_12": "img/Hombros_12.jpg",
-  "Biceps_01": "img/Biceps_01.jpg","Biceps_02": "img/Biceps_02.jpg","Biceps_03": "img/Biceps_03.jpg",
-  "Biceps_04": "img/Biceps_04.jpg","Biceps_05": "img/Biceps_05.jpg","Biceps_06": "img/Biceps_06.jpg",
-  "Biceps_07": "img/Biceps_07.jpg","Biceps_08": "img/Biceps_08.jpg","Biceps_09": "img/Biceps_09.jpg",
-  "Biceps_10": "img/Biceps_10.jpg","Biceps_11": "img/Biceps_11.jpg","Biceps_12": "img/Biceps_12.jpg",
-  "Triceps_01": "img/Triceps_01.jpg","Triceps_02": "img/Triceps_02.jpg","Triceps_03": "img/Triceps_03.jpg",
-  "Triceps_04": "img/Triceps_04.jpg","Triceps_05": "img/Triceps_05.jpg","Triceps_06": "img/Triceps_06.jpg",
-  "Triceps_07": "img/Triceps_07.jpg","Triceps_08": "img/Triceps_08.jpg","Triceps_09": "img/Triceps_09.jpg",
-  "Triceps_10": "img/Triceps_10.jpg","Triceps_11": "img/Triceps_11.jpg","Triceps_12": "img/Triceps_12.jpg",
-  "Piernas_01": "img/Piernas_01.jpg","Piernas_02": "img/Piernas_02.jpg","Piernas_03": "img/Piernas_03.jpg",
-  "Piernas_04": "img/Piernas_04.jpg","Piernas_05": "img/Piernas_05.jpg","Piernas_06": "img/Piernas_06.jpg",
-  "Piernas_07": "img/Piernas_07.jpg","Piernas_08": "img/Piernas_08.jpg","Piernas_09": "img/Piernas_09.jpg",
-  "Piernas_10": "img/Piernas_10.jpg","Piernas_11": "img/Piernas_11.jpg","Piernas_12": "img/Piernas_12.jpg",
-  "Gluteos_01": "img/Gluteos_01.jpg","Gluteos_02": "img/Gluteos_02.jpg","Gluteos_03": "img/Gluteos_03.jpg",
-  "Gluteos_04": "img/Gluteos_04.jpg","Gluteos_05": "img/Gluteos_05.jpg","Gluteos_06": "img/Gluteos_06.jpg",
-  "Gluteos_07": "img/Gluteos_07.jpg","Gluteos_08": "img/Gluteos_08.jpg","Gluteos_09": "img/Gluteos_09.jpg",
-  "Gluteos_10": "img/Gluteos_10.jpg","Gluteos_11": "img/Gluteos_11.jpg","Gluteos_12": "img/Gluteos_12.jpg",
-  "Abdomen_01": "img/Abdomen_01.jpg","Abdomen_02": "img/Abdomen_02.jpg","Abdomen_03": "img/Abdomen_03.jpg",
-  "Abdomen_04": "img/Abdomen_04.jpg","Abdomen_05": "img/Abdomen_05.jpg","Abdomen_06": "img/Abdomen_06.jpg",
-  "Abdomen_07": "img/Abdomen_07.jpg","Abdomen_08": "img/Abdomen_08.jpg","Abdomen_09": "img/Abdomen_09.jpg",
-  "Abdomen_10": "img/Abdomen_10.jpg","Abdomen_11": "img/Abdomen_11.jpg","Abdomen_12": "img/Abdomen_12.jpg",
-  "Running_01": "img/Running_01.jpg","Running_02": "img/Running_02.jpg","Running_03": "img/Running_03.jpg",
-  "Running_04": "img/Running_04.jpg","Running_05": "img/Running_05.jpg","Running_06": "img/Running_06.jpg",
-  "Running_07": "img/Running_07.jpg","Running_08": "img/Running_08.jpg",
-  "Rehab_01": "img/Rehab_01.jpg","Rehab_02": "img/Rehab_02.jpg","Rehab_03": "img/Rehab_03.jpg",
-  "Rehab_04": "img/Rehab_04.jpg","Rehab_05": "img/Rehab_05.jpg","Rehab_06": "img/Rehab_06.jpg",
-  "Rehab_07": "img/Rehab_07.jpg","Rehab_08": "img/Rehab_08.jpg","Rehab_09": "img/Rehab_09.jpg",
-  "Rehab_10": "img/Rehab_10.jpg","Rehab_11": "img/Rehab_11.jpg","Rehab_12": "img/Rehab_12.jpg",
-};
+    // BASE DE DATOS
+    const EXERCISES = {
+        'Pecho': [
+            { n: 'Press con Mancuernas', d: 'En banco plano, empuja hacia arriba.', e: 'Banco + Mancuernas', s: '4x12' },
+            { n: 'Aperturas', d: 'Brazos extendidos, cierra al centro.', e: 'Mancuernas', s: '3x15' }
+        ],
+        'Espalda': [
+            { n: 'Remo a una mano', d: 'Apoya una mano en banco y rema.', e: 'Banco + Mancuerna', s: '4x10' },
+            { n: 'Remo con Banda', d: 'Tira de la banda hacia tu cadera.', e: 'Banda Elástica', s: '4x15' }
+        ],
+        'Piernas': [
+            { n: 'Sentadilla Goblet', d: 'Mancuerna al pecho y baja.', e: 'Mancuerna', s: '4x12' },
+            { n: 'Zancadas', d: 'Paso largo y baja rodilla trasera.', e: 'Mancuernas', s: '3x12' }
+        ],
+        'Bíceps': [
+            { n: 'Curl Alterno', d: 'Giro de muñeca al subir.', e: 'Mancuernas', s: '3x12' }
+        ],
+        'Tríceps': [
+            { n: 'Copa a dos manos', d: 'Mancuerna tras la nuca.', e: 'Mancuerna', s: '3x12' }
+        ]
+    };
 
-const BODY_PARTS = [
-  { id: 'pecho',     emoji: '💪', name: 'Pecho',           imgKey: 'Pecho' },
-  { id: 'espalda',   emoji: '🔙', name: 'Espalda',         imgKey: 'Espalda' },
-  { id: 'hombros',   emoji: '🏋️', name: 'Hombros',         imgKey: 'Hombros' },
-  { id: 'biceps',    emoji: '💥', name: 'Bíceps',           imgKey: 'Biceps' },
-  { id: 'triceps',   emoji: '⚡', name: 'Tríceps',          imgKey: 'Triceps' },
-  { id: 'piernas',   emoji: '🦵', name: 'Piernas',         imgKey: 'Piernas' },
-  { id: 'gluteos',   emoji: '🍑', name: 'Glúteos',         imgKey: 'Gluteos' },
-  { id: 'abdomen',   emoji: '🎯', name: 'Abdomen',         imgKey: 'Abdomen' },
-  { id: 'running',   emoji: '🏃', name: 'Running',         imgKey: 'Running' },
-  { id: 'rehab',     emoji: '🩺', name: 'Rehab Espalda',   imgKey: 'Rehab' },
-];
+    const IMAGES = {
+        'Press con Mancuernas': 'img/Pecho_01.jpg',
+        'Aperturas': 'img/Pecho_02.jpg',
+        'Remo a una mano': 'img/Espalda_01.jpg',
+        'Remo con Banda': 'img/Espalda_02.jpg',
+        'Sentadilla Goblet': 'img/Piernas_01.jpg',
+        'Zancadas': 'img/Piernas_02.jpg',
+        'Curl Alterno': 'img/Biceps_01.jpg',
+        'Copa a dos manos': 'img/Triceps_01.jpg'
+    };
 
-const EXERCISES = {
-  pecho: [
-    { name: 'Flexiones Clásicas',            imgKey: 'Pecho_01',  equip: 'Colchoneta',          sets: '4 × 15', reps: '60 seg', level: 'Básico',   desc: 'En posición de plancha, baja el pecho hasta casi tocar el suelo y empuja hacia arriba. Mantén el cuerpo alineado.' },
-    { name: 'Flexiones Diamante',            imgKey: 'Pecho_02',  equip: 'Colchoneta',          sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'Junta las manos formando un diamante bajo el pecho. Más énfasis en tríceps y pecho interno.' },
-    { name: 'Press con Mancuernas en Suelo', imgKey: 'Pecho_03',  equip: 'Mancuernas',          sets: '4 × 12', reps: '75 seg', level: 'Básico',   desc: 'Acostado en el suelo, lleva las mancuernas al nivel del pecho y empuja hacia arriba controlando el movimiento.' },
-    { name: 'Aperturas con Mancuernas',      imgKey: 'Pecho_04',  equip: 'Mancuernas',          sets: '3 × 12', reps: '75 seg', level: 'Medio',    desc: 'Acostado, con codos ligeramente doblados, abre los brazos en arco amplio y cierra lentamente.' },
-    { name: 'Press Inclinado Mancuernas',    imgKey: 'Pecho_05',  equip: 'Banco + Mancuernas',  sets: '3 × 12', reps: '75 seg', level: 'Medio',    desc: 'En banco inclinado a 35°, realiza press para enfatizar la parte superior del pecho.' },
-    { name: 'Flexiones con Banda',           imgKey: 'Pecho_06',  equip: 'Banda Elástica',      sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Pasa la banda por la espalda y agarra los extremos. Añade resistencia extra a las flexiones clásicas.' },
-    { name: 'Pullover con Mancuerna',        imgKey: 'Pecho_07',  equip: 'Banco + Mancuernas',  sets: '3 × 12', reps: '75 seg', level: 'Medio',    desc: 'Acostado, lleva una mancuerna desde arriba de la cabeza hacia el pecho con brazos extendidos.' },
-    { name: 'Flexiones Declinadas',          imgKey: 'Pecho_08',  equip: 'Banco + Colchoneta',  sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'Coloca los pies en el banco y las manos en el suelo. Trabaja la parte inferior del pecho.' },
-    { name: 'Flexiones Arqueras',            imgKey: 'Pecho_09',  equip: 'Colchoneta',          sets: '3 × 8',  reps: '75 seg', level: 'Avanzado', desc: 'En plancha amplia, dobla un brazo mientras el otro permanece extendido. Trabaja pecho de forma unilateral.' },
-    { name: 'Press Suelo Agarre Neutro',     imgKey: 'Pecho_10',  equip: 'Mancuernas',          sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Con palmas enfrentadas, realiza press en el suelo. Combina pecho y tríceps con menos tensión en el hombro.' },
-    { name: 'Flexiones con Pausa',           imgKey: 'Pecho_11',  equip: 'Colchoneta',          sets: '3 × 8',  reps: '75 seg', level: 'Medio',    desc: 'Baja el pecho al suelo, mantén 2 segundos en el punto más bajo y empuja. Máxima tensión muscular.' },
-    { name: 'Aperturas con Banda de Pie',    imgKey: 'Pecho_12',  equip: 'Banda Elástica',      sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'De pie, con banda anclada atrás, abre y cierra los brazos al frente trabajando el pecho completo.' },
-  ],
-  espalda: [
-    { name: 'Remo Mancuerna Un Brazo',       imgKey: 'Espalda_01', equip: 'Banco + Mancuernas', sets: '4 × 12', reps: '75 seg', level: 'Básico',   desc: 'Apoya una mano y rodilla en el banco. Lleva la mancuerna hacia la cadera apretando el omóplato.' },
-    { name: 'Remo con Banda',                imgKey: 'Espalda_02', equip: 'Banda Elástica',     sets: '4 × 15', reps: '60 seg', level: 'Básico',   desc: 'Sentado con la banda en los pies, jala hacia el abdomen apretando los omóplatos al final.' },
-    { name: 'Superman',                      imgKey: 'Espalda_03', equip: 'Colchoneta',         sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'Boca abajo, levanta simultáneamente brazos y piernas. Mantén 2 segundos arriba y baja lento.' },
-    { name: 'Buenos Días con Mancuernas',    imgKey: 'Espalda_04', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Con mancuernas en los hombros, inclina el torso hacia adelante manteniendo espalda recta.' },
-    { name: 'Jalón de Banda Polea Alta',     imgKey: 'Espalda_05', equip: 'Banda Elástica',     sets: '4 × 12', reps: '60 seg', level: 'Medio',    desc: 'Ancla la banda arriba y jala hacia el pecho separando los codos. Simula el jalón en máquina.' },
-    { name: 'Face Pull con Banda',           imgKey: 'Espalda_06', equip: 'Banda Elástica',     sets: '3 × 15', reps: '60 seg', level: 'Medio',    desc: 'Ancla la banda a la altura de los ojos y jala hacia tu cara con los codos altos.' },
-    { name: 'Extensión de Espalda Suelo',    imgKey: 'Espalda_07', equip: 'Colchoneta',         sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'Boca abajo con manos en la nuca, levanta el torso lentamente trabajando los erectores.' },
-    { name: 'Remo Invertido Bajo Banco',     imgKey: 'Espalda_08', equip: 'Banco',              sets: '3 × 10', reps: '75 seg', level: 'Avanzado', desc: 'Debajo del banco, jala tu pecho hacia arriba con el cuerpo recto como una plancha invertida.' },
-    { name: 'Remo con Dos Mancuernas',       imgKey: 'Espalda_09', equip: 'Mancuernas',         sets: '4 × 12', reps: '75 seg', level: 'Medio',    desc: 'Inclinado a 45°, rema ambas mancuernas simultáneamente hacia las costillas. Espalda completa.' },
-    { name: 'Pull Apart con Banda',          imgKey: 'Espalda_10', equip: 'Banda Elástica',     sets: '3 × 20', reps: '45 seg', level: 'Básico',   desc: 'De pie, sostén la banda al frente y separa los brazos horizontalmente hasta tocar el pecho.' },
-    { name: 'Remo al Mentón con Banda',      imgKey: 'Espalda_11', equip: 'Banda Elástica',     sets: '3 × 15', reps: '60 seg', level: 'Medio',    desc: 'Parado sobre la banda, jala hacia el mentón con codos altos y abiertos. Trabaja trapecios.' },
-    { name: 'Superman con Alternancia',      imgKey: 'Espalda_12', equip: 'Colchoneta',         sets: '3 × 12', reps: '45 seg', level: 'Básico',   desc: 'Boca abajo, levanta brazo y pierna opuestos de forma alterna. Estabilidad y fuerza de espalda.' },
-  ],
-  hombros: [
-    { name: 'Press Militar con Mancuernas',  imgKey: 'Hombros_01', equip: 'Mancuernas',         sets: '4 × 12', reps: '75 seg', level: 'Básico',   desc: 'Sentado o de pie, eleva las mancuernas desde los hombros hasta arriba extendiendo los brazos.' },
-    { name: 'Elevaciones Laterales',         imgKey: 'Hombros_02', equip: 'Mancuernas',         sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'De pie, eleva los brazos a los lados hasta la altura de los hombros con codos ligeramente doblados.' },
-    { name: 'Elevaciones Frontales Alternas',imgKey: 'Hombros_03', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Levanta las mancuernas hacia el frente, alternando brazos, hasta la altura de los hombros.' },
-    { name: 'Press Arnold',                  imgKey: 'Hombros_04', equip: 'Mancuernas',         sets: '3 × 10', reps: '75 seg', level: 'Medio',    desc: 'Inicia con palmas hacia ti, rota mientras subes hasta quedar palmas al frente. Trabaja todos los haces.' },
-    { name: 'Elevaciones Laterales Banda',   imgKey: 'Hombros_05', equip: 'Banda Elástica',     sets: '4 × 15', reps: '60 seg', level: 'Básico',   desc: 'Parado sobre la banda, eleva los brazos a los lados con resistencia constante.' },
-    { name: 'Pájaro con Mancuernas',         imgKey: 'Hombros_06', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Inclinado a 45°, abre los brazos hacia atrás. Trabaja el hombro posterior.' },
-    { name: 'Rotación Externa con Banda',    imgKey: 'Hombros_07', equip: 'Banda Elástica',     sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'Con el codo a 90° pegado al cuerpo, rota el antebrazo hacia afuera. Esencial para el manguito rotador.' },
-    { name: 'Flexiones Pike',                imgKey: 'Hombros_08', equip: 'Colchoneta',         sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'En posición de V invertida, dobla los codos hasta llevar la cabeza al suelo. Énfasis total en hombros.' },
-    { name: 'Press Z con Mancuernas',        imgKey: 'Hombros_09', equip: 'Mancuernas',         sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'Press unilateral con rotación de torso. Trabaja hombro y estabilidad de core simultáneamente.' },
-    { name: 'Elevaciones con Banda a 90°',   imgKey: 'Hombros_10', equip: 'Banda Elástica',     sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'Con banda anclada al lado, eleva el brazo lateral a 90° contra resistencia. Aislamiento del deltoides medio.' },
-    { name: 'Press Neutro Sentado',          imgKey: 'Hombros_11', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Press con palmas enfrentadas. Menor estrés en el manguito rotador, ideal para empezar.' },
-    { name: 'Encogimientos con Mancuernas',  imgKey: 'Hombros_12', equip: 'Mancuernas',         sets: '3 × 20', reps: '45 seg', level: 'Básico',   desc: 'De pie, eleva los hombros hacia las orejas y mantén 1 segundo arriba. Trabaja trapecios.' },
-  ],
-  biceps: [
-    { name: 'Curl Alternado Mancuernas',     imgKey: 'Biceps_01', equip: 'Mancuernas',          sets: '4 × 12', reps: '60 seg', level: 'Básico',   desc: 'De pie, curla una mancuerna a la vez hacia el hombro. Supina la muñeca al subir.' },
-    { name: 'Curl Martillo',                 imgKey: 'Biceps_02', equip: 'Mancuernas',          sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Con las palmas mirándose, eleva las mancuernas. Trabaja bíceps y braquial.' },
-    { name: 'Curl con Banda',                imgKey: 'Biceps_03', equip: 'Banda Elástica',      sets: '4 × 15', reps: '45 seg', level: 'Básico',   desc: 'Para sobre la banda y curla ambos extremos hacia los hombros de forma controlada.' },
-    { name: 'Curl en Banco Inclinado',       imgKey: 'Biceps_04', equip: 'Banco + Mancuernas',  sets: '3 × 10', reps: '75 seg', level: 'Medio',    desc: 'Recostado en banco inclinado, cuelga los brazos y curla lentamente. Mayor rango de movimiento.' },
-    { name: 'Curl de Concentración',         imgKey: 'Biceps_05', equip: 'Mancuernas',          sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Sentado, apoya el codo en la parte interna del muslo y curla la mancuerna. Máxima contracción.' },
-    { name: 'Curl Isométrico con Banda',     imgKey: 'Biceps_06', equip: 'Banda Elástica',      sets: '3 × 30 seg', reps: '30 seg', level: 'Básico', desc: 'Sostén la banda en tensión con el bíceps contraído a 90°. Trabaja la resistencia isométrica.' },
-    { name: 'Curl 21s con Mancuernas',       imgKey: 'Biceps_07', equip: 'Mancuernas',          sets: '3 × 21', reps: '90 seg', level: 'Avanzado', desc: '7 reps mitad inferior + 7 reps mitad superior + 7 reps rango completo. Sin descanso entre partes.' },
-    { name: 'Curl Agarre Ancho',             imgKey: 'Biceps_08', equip: 'Mancuernas',          sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Con las mancuernas alejadas del cuerpo, curla. Trabaja más la cabeza corta del bíceps.' },
-    { name: 'Curl Predicador con Banda',     imgKey: 'Biceps_09', equip: 'Banda Elástica + Banco', sets: '3 × 12', reps: '60 seg', level: 'Medio', desc: 'Apoya el brazo en el banco inclinado con la banda. Aísla el bíceps eliminando impulso.' },
-    { name: 'Curl Cross Body',               imgKey: 'Biceps_10', equip: 'Mancuernas',          sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Curla la mancuerna cruzando el cuerpo hacia el hombro opuesto. Énfasis en el braquial.' },
-    { name: 'Curl en Supinación Lenta',      imgKey: 'Biceps_11', equip: 'Mancuernas',          sets: '3 × 10', reps: '75 seg', level: 'Medio',    desc: 'Inicia en agarre neutro y rota la muñeca lentamente al subir. Activa el supinador y bíceps.' },
-    { name: 'Curl Banda Polea Baja',         imgKey: 'Biceps_12', equip: 'Banda Elástica',      sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Con banda anclada atrás en el suelo, curla hacia adelante. Mayor estiramiento de la cabeza larga.' },
-  ],
-  triceps: [
-    { name: 'Extensión Banda Polea Alta',    imgKey: 'Triceps_01', equip: 'Banda Elástica',     sets: '4 × 15', reps: '60 seg', level: 'Básico',   desc: 'Ancla la banda arriba, toma los extremos y extiende los brazos hacia abajo. Codos fijos.' },
-    { name: 'Press Agarre Cerrado',          imgKey: 'Triceps_02', equip: 'Mancuernas',         sets: '4 × 12', reps: '75 seg', level: 'Medio',    desc: 'Press con mancuernas pegadas al cuerpo. Los codos apuntan hacia adelante para activar tríceps.' },
-    { name: 'Skull Crusher',                 imgKey: 'Triceps_03', equip: 'Mancuernas + Colchoneta', sets: '3 × 12', reps: '60 seg', level: 'Medio', desc: 'Acostado, lleva las mancuernas doblando los codos hacia la frente y extiende.' },
-    { name: 'Fondos en Banco',               imgKey: 'Triceps_04', equip: 'Banco',              sets: '4 × 12', reps: '60 seg', level: 'Básico',   desc: 'Manos en el borde del banco, baja y sube flexionando los codos. Excelente para tríceps.' },
-    { name: 'Patada de Tríceps',             imgKey: 'Triceps_05', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Inclinado a 45°, con el codo a 90°, extiende el brazo hacia atrás completamente.' },
-    { name: 'Flexiones Diamante Tríceps',    imgKey: 'Triceps_06', equip: 'Colchoneta',         sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'Junta las manos bajo el pecho en forma de triángulo. Máximo enfoque en tríceps.' },
-    { name: 'Extensión sobre Cabeza',        imgKey: 'Triceps_07', equip: 'Mancuernas',         sets: '3 × 12', reps: '75 seg', level: 'Medio',    desc: 'De pie, lleva una mancuerna detrás de la cabeza con ambas manos y extiende hacia arriba.' },
-    { name: 'Press con Banda desde Suelo',   imgKey: 'Triceps_08', equip: 'Banda Elástica',     sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'Ancla la banda bajo el cuerpo y ejecuta un press enfocando la extensión del codo.' },
-    { name: 'Extensión Un Brazo con Banda',  imgKey: 'Triceps_09', equip: 'Banda Elástica',     sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Con banda anclada arriba, realiza extensión unilateral. Permite corregir desequilibrios.' },
-    { name: 'Fondos entre Dos Bancos',       imgKey: 'Triceps_10', equip: 'Banco',              sets: '3 × 10', reps: '75 seg', level: 'Avanzado', desc: 'Pies en un banco, manos en otro, baja entre ambos. Mayor rango que los fondos normales.' },
-    { name: 'Extensión Un Brazo de Pie',     imgKey: 'Triceps_11', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'De pie, extiende una mancuerna sobre la cabeza unilateralmente. Trabaja la cabeza larga.' },
-    { name: 'Press Banda con Pausa',         imgKey: 'Triceps_12', equip: 'Banda Elástica + Banco', sets: '3 × 10', reps: '75 seg', level: 'Medio', desc: 'Press en banco con banda añadida, pausa de 2 segundos al extender. Máxima contracción de tríceps.' },
-  ],
-  piernas: [
-    { name: 'Sentadilla con Mancuernas',     imgKey: 'Piernas_01', equip: 'Mancuernas',         sets: '4 × 15', reps: '75 seg', level: 'Básico',   desc: 'Mancuernas colgando a los lados o en copa. Baja hasta los 90° manteniendo la espalda recta.' },
-    { name: 'Zancadas Alternadas',           imgKey: 'Piernas_02', equip: 'Colchoneta',         sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Da un paso largo hacia adelante y baja la rodilla trasera casi al suelo. Alterna piernas.' },
-    { name: 'Sentadilla con Banda',          imgKey: 'Piernas_03', equip: 'Banda Elástica',     sets: '4 × 20', reps: '60 seg', level: 'Básico',   desc: 'Coloca la banda sobre los muslos o encima de las rodillas para activar glúteos y abductores.' },
-    { name: 'Peso Muerto Rumano',            imgKey: 'Piernas_04', equip: 'Mancuernas',         sets: '4 × 12', reps: '75 seg', level: 'Medio',    desc: 'Con piernas casi rectas, baja las mancuernas por las piernas hasta sentir tensión en isquios.' },
-    { name: 'Step Up al Banco',              imgKey: 'Piernas_05', equip: 'Banco',              sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Sube al banco con un pie y eleva la rodilla contraria. Baja lentamente controlando el movimiento.' },
-    { name: 'Sentadilla Sumo',               imgKey: 'Piernas_06', equip: 'Mancuernas',         sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'Pies abiertos y apuntando hacia afuera, sostén una mancuerna en el centro y haz sentadilla.' },
-    { name: 'Curl de Pierna con Banda',      imgKey: 'Piernas_07', equip: 'Banda Elástica',     sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'Boca abajo, ancla la banda al tobillo y curla la pierna hacia los glúteos.' },
-    { name: 'Sentadilla Búlgara',            imgKey: 'Piernas_08', equip: 'Banco + Mancuernas', sets: '3 × 10', reps: '90 seg', level: 'Avanzado', desc: 'Pie trasero apoyado en el banco, baja en sentadilla unilateral. Intenso para cuádriceps y glúteo.' },
-    { name: 'Extensión Cuádriceps Banda',    imgKey: 'Piernas_09', equip: 'Banda Elástica + Banco', sets: '3 × 15', reps: '60 seg', level: 'Básico', desc: 'Sentado con la banda anclada al tobillo, extiende la rodilla completamente. Aísla el cuádriceps.' },
-    { name: 'Sentadilla Pistol Asistida',    imgKey: 'Piernas_10', equip: 'Banda Elástica',     sets: '3 × 8',  reps: '90 seg', level: 'Avanzado', desc: 'Con ayuda de banda, realiza sentadilla sobre una sola pierna. Fuerza unilateral extrema.' },
-    { name: 'Desplante Lateral',             imgKey: 'Piernas_11', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Da un paso lateral amplio y baja en sentadilla hacia ese lado. Trabaja aductores y cuádriceps.' },
-    { name: 'Elevación de Talones',          imgKey: 'Piernas_12', equip: 'Mancuernas',         sets: '4 × 20', reps: '45 seg', level: 'Básico',   desc: 'De pie con mancuernas, eleva los talones lo más alto posible. Trabaja gemelos y soleo.' },
-  ],
-  gluteos: [
-    { name: 'Hip Thrust con Mancuerna',      imgKey: 'Gluteos_01', equip: 'Banco + Mancuernas', sets: '4 × 15', reps: '75 seg', level: 'Básico',   desc: 'Hombros en el banco, cadera al suelo, coloca la mancuerna en el pubis y eleva las caderas.' },
-    { name: 'Puente de Glúteos',             imgKey: 'Gluteos_02', equip: 'Colchoneta',         sets: '4 × 20', reps: '60 seg', level: 'Básico',   desc: 'Acostado boca arriba, pies en el suelo, eleva las caderas apretando glúteos al máximo arriba.' },
-    { name: 'Abducción con Banda de Pie',    imgKey: 'Gluteos_03', equip: 'Banda Elástica',     sets: '4 × 20', reps: '45 seg', level: 'Básico',   desc: 'De pie o acostado, coloca la banda sobre las rodillas y abre las piernas contra la resistencia.' },
-    { name: 'Patada Trasera con Banda',      imgKey: 'Gluteos_04', equip: 'Banda Elástica',     sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'A 4 patas, ancla la banda al tobillo y empuja la pierna hacia atrás y arriba apretando el glúteo.' },
-    { name: 'Peso Muerto Una Pierna',        imgKey: 'Gluteos_05', equip: 'Mancuernas',         sets: '3 × 10', reps: '75 seg', level: 'Avanzado', desc: 'Sobre una pierna, baja el torso hasta la horizontal con mancuernas. Trabaja glúteo y estabilidad.' },
-    { name: 'Sentadilla Sumo Profunda',      imgKey: 'Gluteos_06', equip: 'Mancuernas',         sets: '3 × 15', reps: '60 seg', level: 'Básico',   desc: 'Pies muy abiertos, punta hacia fuera. Baja profundo para máxima activación de glúteo medio.' },
-    { name: 'Clamshell con Banda',           imgKey: 'Gluteos_07', equip: 'Banda Elástica + Colchoneta', sets: '3 × 20', reps: '45 seg', level: 'Básico', desc: 'De lado, rodillas dobladas, banda sobre muslos. Abre y cierra la rodilla superior como almeja.' },
-    { name: 'Puente con Una Pierna',         imgKey: 'Gluteos_08', equip: 'Colchoneta',         sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Igual que el puente normal pero una pierna extendida en el aire. Doble trabajo para cada glúteo.' },
-    { name: 'Patada Lateral con Banda',      imgKey: 'Gluteos_09', equip: 'Banda Elástica',     sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'De pie con banda en los tobillos, eleva una pierna lateralmente. Activa el glúteo medio.' },
-    { name: 'Hip Thrust Una Pierna',         imgKey: 'Gluteos_10', equip: 'Banco',              sets: '3 × 12', reps: '75 seg', level: 'Avanzado', desc: 'Hip thrust con una sola pierna apoyada. Máxima activación unilateral del glúteo mayor.' },
-    { name: 'Sentadilla con Banda y Pausa',  imgKey: 'Gluteos_11', equip: 'Banda Elástica',     sets: '3 × 12', reps: '75 seg', level: 'Medio',    desc: 'Sentadilla con banda sobre rodillas, mantén 3 segundos abajo. Tensión sostenida en glúteos.' },
-    { name: 'Zancada Reversa',               imgKey: 'Gluteos_12', equip: 'Mancuernas',         sets: '3 × 12', reps: '60 seg', level: 'Básico',   desc: 'Da el paso hacia atrás en lugar de adelante. Menor estrés en rodilla, más activación de glúteo.' },
-  ],
-  abdomen: [
-    { name: 'Plancha Frontal',               imgKey: 'Abdomen_01', equip: 'Colchoneta',         sets: '3 × 40 seg', reps: '45 seg', level: 'Básico', desc: 'En posición de flexión, sostén el cuerpo recto como una tabla. No dejes caer la cadera.' },
-    { name: 'Crunch con Banda',              imgKey: 'Abdomen_02', equip: 'Banda Elástica',     sets: '3 × 20', reps: '60 seg', level: 'Básico',   desc: 'Ancla la banda atrás o arriba, tómala en la nuca y curla el tronco hacia adelante contra la resistencia.' },
-    { name: 'Mountain Climbers',             imgKey: 'Abdomen_03', equip: 'Colchoneta',         sets: '3 × 30 seg', reps: '30 seg', level: 'Medio', desc: 'En plancha, alterna rodillas al pecho rápidamente. Combina fuerza de core y cardio.' },
-    { name: 'Elevación de Piernas',          imgKey: 'Abdomen_04', equip: 'Colchoneta',         sets: '4 × 12', reps: '60 seg', level: 'Medio',    desc: 'Acostado, eleva piernas rectas hasta 90° y baja lentamente sin tocar el suelo.' },
-    { name: 'Russian Twist con Mancuerna',   imgKey: 'Abdomen_05', equip: 'Mancuernas',         sets: '3 × 20', reps: '60 seg', level: 'Medio',    desc: 'Sentado a 45°, gira el torso de lado a lado sosteniendo una mancuerna. Trabaja oblicuos.' },
-    { name: 'Plancha Lateral',               imgKey: 'Abdomen_06', equip: 'Colchoneta',         sets: '3 × 30 seg', reps: '30 seg', level: 'Medio', desc: 'Apoyado en un codo y pie lateral, mantén el cuerpo recto. Alterna lados. Activa oblicuos.' },
-    { name: 'Dead Bug',                      imgKey: 'Abdomen_07', equip: 'Colchoneta',         sets: '3 × 10', reps: '60 seg', level: 'Básico',   desc: 'Acostado, baja brazo y pierna opuestos sin tocar el suelo. Excelente para estabilidad lumbar.' },
-    { name: 'Hollow Body Hold',              imgKey: 'Abdomen_08', equip: 'Colchoneta',         sets: '3 × 30 seg', reps: '45 seg', level: 'Avanzado', desc: 'Acostado, levanta hombros y piernas formando una "banana" hueca. Máxima tensión de core.' },
-    { name: 'Bicicleta Abdominal',           imgKey: 'Abdomen_09', equip: 'Colchoneta',         sets: '3 × 20', reps: '45 seg', level: 'Básico',   desc: 'Acostado, alterna codo con rodilla opuesta en movimiento de pedaleo. Rectus y oblicuos.' },
-    { name: 'Toe Touch',                     imgKey: 'Abdomen_10', equip: 'Colchoneta',         sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'Piernas verticales, toca los pies con las manos crunchando el abdomen superior.' },
-    { name: 'Plancha con Toque de Hombro',   imgKey: 'Abdomen_11', equip: 'Colchoneta',         sets: '3 × 16', reps: '45 seg', level: 'Medio',    desc: 'En plancha alta, toca el hombro opuesto alternando. Desafía la estabilidad anti-rotacional.' },
-    { name: 'Rollout con Mancuerna',         imgKey: 'Abdomen_12', equip: 'Mancuernas',         sets: '3 × 10', reps: '75 seg', level: 'Avanzado', desc: 'De rodillas, rueda la mancuerna hacia adelante extendiendo el cuerpo. Core anti-extensión.' },
-  ],
-  running: [
-    { name: 'Elevación de Rodillas de Pie',  imgKey: 'Running_01', equip: 'Colchoneta',         sets: '4 × 20', reps: '45 seg', level: 'Básico',   desc: 'De pie, impulsa las rodillas hacia arriba de forma alternada simulando la zancada de carrera. Activa flexores de cadera.' },
-    { name: 'Zancadas con Impulso',          imgKey: 'Running_02', equip: 'Colchoneta',         sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'Desde posición de zancada, impulsa explosivamente hacia arriba alternando piernas. Potencia y glúteos.' },
-    { name: 'Saltos al Banco',               imgKey: 'Running_03', equip: 'Banco',              sets: '3 × 10', reps: '75 seg', level: 'Medio',    desc: 'Salta con ambos pies al banco y baja controlado. Desarrolla la potencia de piernas para el sprint.' },
-    { name: 'Skipping de Alta Rodilla',      imgKey: 'Running_04', equip: 'Colchoneta',         sets: '4 × 30 seg', reps: '30 seg', level: 'Medio', desc: 'Corre en el lugar elevando las rodillas al máximo. Mejora la cadencia y la fuerza de cadera.' },
-    { name: 'Elevación de Talones con Banda',imgKey: 'Running_05', equip: 'Banda Elástica',     sets: '4 × 20', reps: '45 seg', level: 'Básico',   desc: 'Con banda en los hombros, eleva los talones. Fortalece gemelos y soleo para la propulsión en carrera.' },
-    { name: 'Hip Flexor con Banda',          imgKey: 'Running_06', equip: 'Banda Elástica',     sets: '3 × 12', reps: '60 seg', level: 'Medio',    desc: 'Con banda anclada atrás en la cadera, lleva la rodilla hacia adelante contra resistencia. Flexores de cadera.' },
-    { name: 'Puente Nórdico Isquiotibiales', imgKey: 'Running_07', equip: 'Banco + Colchoneta', sets: '3 × 8',  reps: '90 seg', level: 'Avanzado', desc: 'De rodillas con pies anclados, baja el torso lentamente hacia el suelo frenando con los isquios.' },
-    { name: 'Saltos Laterales con Aterrizaje',imgKey: 'Running_08', equip: 'Colchoneta',        sets: '3 × 10', reps: '60 seg', level: 'Medio',    desc: 'Salta lateralmente de un pie al otro aterrizando suave. Estabilidad de tobillo y glúteo medio.' },
-  ],
-  rehab: [
-    { name: 'Respiración Diafragmática',     imgKey: 'Rehab_01',  equip: 'Colchoneta',          sets: '3 × 10', reps: '30 seg', level: 'Básico',   desc: 'Acostado, inhala expandiendo el abdomen y exhala activando suavemente el core. Base de toda rehabilitación.' },
-    { name: 'Basculación Pélvica',           imgKey: 'Rehab_02',  equip: 'Colchoneta',          sets: '3 × 15', reps: '30 seg', level: 'Básico',   desc: 'Acostado boca arriba, alterna entre arquear y aplanar la zona lumbar suavemente contra el suelo.' },
-    { name: 'Bird Dog',                      imgKey: 'Rehab_03',  equip: 'Colchoneta',          sets: '3 × 10', reps: '45 seg', level: 'Básico',   desc: 'A cuatro patas, extiende brazo y pierna opuestos manteniendo la columna completamente neutra.' },
-    { name: 'Plancha Modificada en Rodillas',imgKey: 'Rehab_04',  equip: 'Colchoneta',          sets: '3 × 20 seg', reps: '30 seg', level: 'Básico', desc: 'Plancha desde las rodillas. Versión suave para activar el core sin cargar la zona lumbar.' },
-    { name: 'Estiramiento del Piriforme',    imgKey: 'Rehab_05',  equip: 'Colchoneta',          sets: '3 × 30 seg', reps: '20 seg', level: 'Básico', desc: 'Acostado, cruza un tobillo sobre la rodilla opuesta y acerca suavemente. Alivia la ciática.' },
-    { name: 'Cat Cow Vertebral',             imgKey: 'Rehab_06',  equip: 'Colchoneta',          sets: '3 × 10', reps: '30 seg', level: 'Básico',   desc: 'A cuatro patas, alterna entre arquear (vaca) y redondear (gato) la columna. Movilidad lumbar.' },
-    { name: 'Puente Glúteos Rehabilitador',  imgKey: 'Rehab_07',  equip: 'Colchoneta',          sets: '3 × 15', reps: '45 seg', level: 'Básico',   desc: 'Puente de glúteos lento con pausa arriba de 3 segundos. Activa glúteos sin comprimir la espalda.' },
-    { name: 'Estiramiento Flexores Cadera',  imgKey: 'Rehab_08',  equip: 'Colchoneta',          sets: '3 × 30 seg', reps: '20 seg', level: 'Básico', desc: 'En media arrodillada, desplaza la cadera hacia adelante suavemente. Alivia tensión lumbar.' },
-    { name: 'Extensión de Cadera en Suelo',  imgKey: 'Rehab_09',  equip: 'Colchoneta',          sets: '3 × 12', reps: '45 seg', level: 'Básico',   desc: 'Boca abajo, levanta una pierna extendida lentamente. Activa glúteo sin comprimir la columna.' },
-    { name: 'Estiramiento Isquiotibiales',   imgKey: 'Rehab_10',  equip: 'Colchoneta',          sets: '3 × 30 seg', reps: '20 seg', level: 'Básico', desc: 'Acostado, lleva una pierna extendida hacia el pecho con ayuda de una banda. Reduce tensión lumbar.' },
-    { name: 'Rotación de Cadera en Suelo',   imgKey: 'Rehab_11',  equip: 'Colchoneta',          sets: '3 × 10', reps: '30 seg', level: 'Básico',   desc: 'Acostado boca arriba, lleva las rodillas de lado a lado lentamente. Moviliza la zona lumbar.' },
-    { name: 'Activación de Multífidos',      imgKey: 'Rehab_12',  equip: 'Colchoneta',          sets: '3 × 10', reps: '45 seg', level: 'Básico',   desc: 'A cuatro patas, activa suavemente la musculatura profunda de la espalda sin movimiento externo visible.' },
-  ],
-};
+    let selectedMuscles = [];
 
-let selected = new Set();
-let exerciseCount = 6;
-let currentWorkout = [];
+    // NAVEGACIÓN
+    function nav(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
+    }
 
-function go(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
-}
+    // INICIALIZAR GRID
+    function initGrid() {
+        const grid = document.getElementById('muscle-grid');
+        Object.keys(EXERCISES).forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'chip';
+            div.innerText = m;
+            div.onclick = () => {
+                div.classList.toggle('selected');
+                if(selectedMuscles.includes(m)) selectedMuscles = selectedMuscles.filter(i => i !== m);
+                else selectedMuscles.push(m);
+            };
+            grid.appendChild(div);
+        });
+    }
 
-function openLightbox(src) {
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-}
+    // GENERAR RUTINA
+    function generateWorkout() {
+        if(selectedMuscles.length === 0) return alert("Selecciona al menos una zona");
+        
+        const count = document.getElementById('ex-count').value;
+        const pool = [];
+        selectedMuscles.forEach(m => pool.push(...EXERCISES[m]));
+        
+        const shuffled = pool.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, count);
 
-function buildPartsGrid() {
-  const grid = document.getElementById('parts-grid');
-  grid.innerHTML = '';
-  BODY_PARTS.forEach(part => {
-    const count = EXERCISES[part.id].length;
-    const card = document.createElement('div');
-    card.className = 'part-card' + (selected.has(part.id) ? ' selected' : '');
-    card.innerHTML = `
-      <div class="emoji">${part.emoji}</div>
-      <div class="part-name">${part.name}</div>
-      <div class="part-count">${count} ejercicios</div>`;
-    card.addEventListener('click', () => togglePart(part.id, card));
-    grid.appendChild(card);
-  });
-}
+        const list = document.getElementById('workout-list');
+        list.innerHTML = '';
 
-function togglePart(id, card) {
-  if (selected.has(id)) { selected.delete(id); card.classList.remove('selected'); }
-  else { selected.add(id); card.classList.add('selected'); }
-  document.getElementById('start-btn').disabled = selected.size === 0;
-}
+        selected.forEach(ex => {
+            const imgPath = IMAGES[ex.n] || 'https://via.placeholder.com/300x150?text=GYM+FLOW';
+            list.innerHTML += `
+                <div class="exercise-card">
+                    <img src="${imgPath}" class="ex-img" onclick="showLB(this.src)" onerror="this.src='https://via.placeholder.com/300x150?text=SIN+IMAGEN'">
+                    <h3>${ex.n}</h3>
+                    <p>${ex.d}</p>
+                    <div class="ex-meta">
+                        <span>EQUIPO: ${ex.e}</span>
+                        <span>${ex.s}</span>
+                    </div>
+                </div>
+            `;
+        });
+        nav('s-workout');
+    }
 
-function changeCount(delta) {
-  exerciseCount = Math.max(1, Math.min(20, exerciseCount + delta));
-  document.getElementById('count-display').textContent = exerciseCount;
-}
+    function showLB(src) {
+        document.getElementById('lb-img').src = src;
+        document.getElementById('lightbox').style.display = 'flex';
+    }
 
-function getRandomExercises() {
-  const pool = [];
-  selected.forEach(partId => {
-    const part = BODY_PARTS.find(p => p.id === partId);
-    EXERCISES[partId].forEach(ex => pool.push({ ...ex, muscle: part.name }));
-  });
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool.slice(0, Math.min(exerciseCount, pool.length));
-}
-
-function startWorkout() {
-  currentWorkout = getRandomExercises();
-  renderWorkout();
-  go('s-workout');
-}
-
-function shuffleAgain() {
-  currentWorkout = getRandomExercises();
-  renderWorkout();
-  go('s-workout');
-}
-
-function renderWorkout() {
-  const body = document.getElementById('workout-body');
-  const total = currentWorkout.length;
-  document.getElementById('workout-tag').textContent =
-    [...selected].map(id => BODY_PARTS.find(p => p.id === id).name).join(' · ');
-  document.getElementById('progress-text').textContent = `${total} ejercicios`;
-  document.getElementById('progress-fill').style.width = '100%';
-  body.innerHTML = '';
-
-  currentWorkout.forEach((ex, i) => {
-    const imgSrc = IMAGES[ex.imgKey] || null;
-    const card = document.createElement('div');
-    card.className = 'ex-card';
-    card.style.opacity = '0';
-    setTimeout(() => { card.style.animation = 'slideUp 0.35s ease forwards'; }, i * 70);
-
-    const imgHTML = imgSrc
-      ? `<div class="ex-image-wrap" onclick="openLightbox('${imgSrc}')">
-           <img src="${imgSrc}" alt="${ex.name}" loading="lazy">
-         </div>`
-      : `<div class="img-placeholder">SIN IMAGEN</div>`;
-
-    card.innerHTML = `
-      <div class="ex-card-top">
-        <div class="ex-number">0${i + 1}</div>
-        <div class="ex-info">
-          <div class="ex-name">${ex.name}</div>
-          <div class="ex-tags">
-            <span class="ex-tag tag-equip">${ex.equip}</span>
-            <span class="ex-tag tag-muscle">${ex.muscle}</span>
-            <span class="ex-tag tag-level">${ex.level}</span>
-          </div>
-        </div>
-      </div>
-      ${imgHTML}
-      <div class="ex-desc">${ex.desc}</div>
-      <div class="ex-sets">
-        <div class="set-pill"><span>${ex.sets.split('×')[0].trim()}</span>Series</div>
-        <div class="set-pill"><span>${ex.sets.split('×')[1]?.trim() || '–'}</span>Reps</div>
-        <div class="set-pill"><span>${ex.reps}</span>Descanso</div>
-      </div>`;
-    body.appendChild(card);
-  });
-
-  document.getElementById('done-stats').innerHTML = `
-    <div class="done-stat"><div class="done-stat-val">${total}</div><div class="done-stat-lbl">Ejercicios</div></div>
-    <div class="done-stat"><div class="done-stat-val">${selected.size}</div><div class="done-stat-lbl">Zonas</div></div>`;
-}
-
-buildPartsGrid();
+    initGrid();
 </script>
+
 </body>
 </html>
