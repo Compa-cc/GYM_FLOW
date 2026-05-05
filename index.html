@@ -343,28 +343,7 @@ body { min-height:100%; background:var(--bg); color:var(--text); font-family:'DM
 </div>
 
 <script>
-
-  // ── Service Worker + auto-update ──────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
-
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data && event.data.type === 'SW_UPDATED') {
-      window.location.reload();
-    }
-  });
-}
-
-  // El SW nos avisa cuando ya está activo (post skipWaiting)
-  navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'SW_UPDATED') {
-      document.getElementById('update-banner').classList.add('show');
-    }
-  });
-}
-function applyUpdate() {
-  window.location.reload();
-}
+  
 /* ══════════ DATA (Omitted for brevity, using same EX as provided) ══════════ */
 const IMAGES = {
   Pecho_01:'img/Pecho_01.jpg',Pecho_02:'img/Pecho_02.jpg',Pecho_03:'img/Pecho_03.jpg',Pecho_04:'img/Pecho_04.jpg',Pecho_05:'img/Pecho_05.jpg',Pecho_06:'img/Pecho_06.jpg',Pecho_07:'img/Pecho_07.jpg',Pecho_08:'img/Pecho_08.jpg',Pecho_09:'img/Pecho_09.jpg',Pecho_10:'img/Pecho_10.jpg',Pecho_11:'img/Pecho_11.jpg',Pecho_12:'img/Pecho_12.jpg',
@@ -783,8 +762,24 @@ function updateDots() {
 function markDot(i,cls){ const d=document.getElementById(`dot-${i}`); if(d) d.className=`dot ${cls}`; }
 
 /* ══════════ INIT ══════════ */
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
-buildGrid();
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+
+    // 🔥 detecta nueva versión
+    reg.onupdatefound = () => {
+      const newWorker = reg.installing;
+
+      newWorker.onstatechange = () => {
+        if (newWorker.state === 'installed') {
+          if (navigator.serviceWorker.controller) {
+            // nueva versión disponible → recarga
+            window.location.reload();
+          }
+        }
+      };
+    };
+  });
+}
 </script>
 </body>
 </html>
