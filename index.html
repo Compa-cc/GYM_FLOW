@@ -1,3 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GYM FLOW</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --bg:#0a0a0f; --card:#1c1c28; --accent:#f5ff4e;
+  --red:#ff4e6a; --green:#4eff91;
+  --text:#f0f0f8; --muted:#6b6b88; --border:#2a2a3d;
+}
+html { height:100%; }
+body { min-height:100%; background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; }
+
+.screen { display:none; flex-direction:column; min-height:100svh; }
+.screen.active { display:flex; }
+
+/* HOME */
+#s-home { position:relative; align-items:center; justify-content:center; overflow:hidden; }
+.home-noise { position:absolute; inset:0; pointer-events:none; background: radial-gradient(ellipse at 20% 85%,#f5ff4e1a 0%,transparent 55%), radial-gradient(ellipse at 80% 15%,#ff4e6a14 0%,transparent 50%); }
+.home-grid  { position:absolute; inset:0; pointer-events:none; opacity:.25; background-image: linear-gradient(var(--border) 1px,transparent 1px), linear-gradient(90deg,var(--border) 1px,transparent 1px); background-size:44px 44px; }
+.home-inner { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:28px; padding:48px 24px; text-align:center; }
+.badge { background:var(--accent); color:var(--bg); font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:3px; padding:5px 16px; border-radius:100px; animation:glow 2.8s ease-in-out infinite; }
+@keyframes glow { 0%,100%{ box-shadow:0 0 0 0 #f5ff4e55; } 50%{ box-shadow:0 0 0 14px #f5ff4e00; } }
+.home-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(72px,22vw,104px); line-height:.85; letter-spacing:-2px; }
+.home-title em { color:var(--accent); font-style:normal; }
+.home-sub { font-size:14px; color:var(--muted); line-height:1.65; max-width:272px; }
+
+/* BUTTONS */
+.btn { border:none; cursor:pointer; font-family:'Bebas Neue',sans-serif; letter-spacing:2px; border-radius:4px; transition:transform .12s; user-select:none; display:flex; align-items:center; justify-content:center; }
+.btn:active { transform:scale(.96); }
+.btn:disabled { background:var(--border) !important; color:var(--muted) !important; cursor:not-allowed; transform:none; }
+.btn-y { background:var(--accent); color:var(--bg); font-size:22px; padding:17px 40px; width:100%; }
+.btn-g { background:var(--card); border:1px solid var(--border); color:var(--text); font-size:17px; padding:15px 18px; flex:1; }
+
+/* TOP BAR */
+.top-bar { display:flex; align-items:center; gap:12px; padding:52px 20px 14px; flex-shrink:0; }
+.back-btn { width:40px; height:40px; background:var(--card); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--text); flex-shrink:0; }
+.back-btn:active { background:var(--border); }
+.top-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; }
+.sec-lbl { font-size:10px; letter-spacing:2.5px; color:var(--muted); text-transform:uppercase; margin:20px 0 10px; }
+
+/* SELECT */
+#s-select { background:var(--bg); }
+.scr-body { flex:1; overflow-y:auto; padding:0 20px 120px; -webkit-overflow-scrolling:touch; }
+.parts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.part-card { background:var(--card); border:2px solid var(--border); border-radius:14px; padding:16px 14px; cursor:pointer; position:relative; overflow:hidden; display:flex; flex-direction:column; gap:6px; transition:border-color .15s,background .15s; }
+.part-card:active { transform:scale(.97); }
+.part-card.on { border-color:var(--accent); background:#f5ff4e0e; }
+.part-card.on::after { content:'✓'; position:absolute; top:9px; right:11px; background:var(--accent); color:var(--bg); width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:700; line-height:20px; text-align:center; }
+.part-emoji { font-size:26px; }
+.part-name  { font-family:'Bebas Neue',sans-serif; font-size:16px; line-height:1.1; }
+.part-count { font-size:11px; color:var(--muted); }
+.count-row { display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; }
+.count-label { font-size:15px; font-weight:500; }
+.count-ctrl { display:flex; align-items:center; gap:14px; }
+.cnt-btn { width:36px; height:36px; background:var(--border); border:none; border-radius:8px; color:var(--text); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cnt-btn:active { background:var(--accent); color:var(--bg); }
+.cnt-val { font-family:'Bebas Neue',sans-serif; font-size:32px; min-width:36px; text-align:center; }
+.bottom-bar { position:fixed; bottom:0; left:0; right:0; z-index:20; padding:14px 20px 32px; background:linear-gradient(to top,var(--bg) 60%,transparent); display:flex; gap:10px; }
+
+/* WORKOUT */
+#s-workout { background:var(--bg); }
+.wo-header { padding:52px 20px 8px; flex-shrink:0; }
+.wo-meta   { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.wo-zones  { font-size:11px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; flex:1; }
+.wo-count  { font-size:12px; color:var(--muted); }
+.prog-wrap { height:3px; background:var(--border); border-radius:100px; overflow:hidden; }
+.prog-fill { height:100%; background:var(--accent); border-radius:100px; }
+.wo-list { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 20px 130px; display:flex; flex-direction:column; gap:14px; }
+
+/* Exercise card */
+.ex-card { background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; animation:slideUp .3s ease both; }
+@keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+.ex-head { display:flex; gap:12px; align-items:flex-start; padding:16px 16px 12px; }
+.ex-num  { font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:1; color:var(--border); flex-shrink:0; }
+.ex-meta { flex:1; min-width:0; }
+.ex-name { font-family:'Bebas Neue',sans-serif; font-size:21px; line-height:1.1; }
+.ex-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+.tag     { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:3px 8px; border-radius:100px; font-weight:500; }
+.tag-eq  { background:#f5ff4e18; color:var(--accent); border:1px solid #f5ff4e33; }
+.tag-mu  { background:#ff4e6a18; color:var(--red);    border:1px solid #ff4e6a33; }
+.tag-lv  { background:#fff1;     color:var(--muted);  border:1px solid var(--border); }
+
+/* Image */
+.ex-img-wrap { width:100%; aspect-ratio:16/9; background:#0d0d18; overflow:hidden; position:relative; }
+.ex-img-wrap img { width:100%; height:100%; object-fit:contain; object-position:center; display:block; transition:transform .25s; cursor:pointer; }
+.ex-img-wrap:active img { transform:scale(1.03); }
+.img-hint { position:absolute; bottom:8px; right:10px; font-size:10px; color:#ffffff33; pointer-events:none; }
+.ex-no-img { width:100%; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; background:#0d0d18; color:var(--border); font-size:12px; letter-spacing:1px; position:relative;}
+
+/* YT Button Overlay */
+.yt-overlay-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #ff0000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.yt-overlay-btn:active { transform: scale(0.92); }
+
+/* Description */
+.ex-desc { padding:12px 16px; font-size:13px; color:var(--muted); line-height:1.65; border-top:1px solid var(--border); }
+
+/* Stats */
+.ex-stats { display:flex; gap:6px; padding:10px 16px; border-top:1px solid var(--border); }
+.stat-pill { flex:1; background:var(--border); border-radius:8px; padding:8px 10px; text-align:center; font-size:11px; font-weight:500; }
+.stat-pill strong { display:block; font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent); font-weight:400; }
+
+/* Timer trigger button */
+.ex-timer-btn { width:100%; padding:13px; border:none; background:linear-gradient(to right,#f5ff4e1a,#f5ff4e08); border-top:1px solid #f5ff4e1a; color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+.ex-timer-btn:active { background:#f5ff4e28; }
+
+/* LIGHTBOX */
+.lightbox { display:none; position:fixed; inset:0; z-index:900; background:#000000ee; align-items:center; justify-content:center; padding:16px; }
+.lightbox.open { display:flex; }
+.lightbox img { max-width:100%; max-height:92svh; border-radius:10px; object-fit:contain; }
+.lb-close { position:absolute; top:14px; right:14px; width:38px; height:38px; background:var(--card); border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); font-size:18px; }
+
+/* TIMER SCREEN */
+#s-timer { background:var(--bg); }
+.tmr-header { display:flex; align-items:flex-start; gap:12px; padding:52px 20px 0; flex-shrink:0; }
+.tmr-name { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:.5px; line-height:1.2; flex:1; }
+.tmr-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 48px; display:flex; flex-direction:column; align-items:center; gap:16px; }
+
+/* Config */
+.cfg-row { display:flex; gap:10px; width:100%; }
+.cfg-card { flex:1; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.cfg-lbl  { font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+.cfg-ctrl { display:flex; align-items:center; gap:8px; }
+.cfg-btn  { width:30px; height:30px; background:var(--border); border:none; border-radius:7px; color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cfg-btn:active { background:var(--accent); color:var(--bg); }
+.cfg-val  { font-family:'Bebas Neue',sans-serif; font-size:26px; min-width:30px; text-align:center; color:var(--accent); }
+
+/* Ring */
+.ring-wrap { position:relative; width:220px; height:220px; flex-shrink:0; }
+.ring-wrap svg { transform:rotate(-90deg); }
+.ring-bg  { fill:none; stroke:var(--border); stroke-width:10; }
+.ring-arc { fill:none; stroke-width:10; stroke-linecap:round; stroke-dasharray:628.3; stroke-dashoffset:0; transition:stroke-dashoffset 1s linear,stroke .3s; }
+.ring-arc.p-idle { stroke:var(--border); }
+.ring-arc.p-work { stroke:var(--accent); }
+.ring-arc.p-rest { stroke:var(--green);  }
+.ring-arc.p-done { stroke:var(--red);    }
+
+.ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+.ring-phase  { font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+.ring-time   { font-family:'Bebas Neue',sans-serif; font-size:62px; line-height:1; letter-spacing:-1px; }
+.ring-time.p-idle { color:var(--muted); }
+.ring-time.p-work { color:var(--accent); }
+.ring-time.p-rest { color:var(--green);  }
+.ring-time.p-done { color:var(--red);    }
+.ring-sub    { font-size:11px; color:var(--muted); letter-spacing:.5px; text-align:center; padding:0 12px; }
+
+/* Dots */
+.dots { display:flex; gap:8px; }
+.dot  { width:10px; height:10px; border-radius:50%; background:var(--border); transition:all .3s; }
+.dot.d-done   { background:var(--accent); }
+.dot.d-active { background:var(--accent); box-shadow:0 0 0 3px #f5ff4e33; }
+
+/* Rep counter */
+.rep-wrap { width:100%; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
+.rep-left .rep-lbl { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:2px; }
+.rep-left .rep-val { font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--accent); line-height:1; }
+.rep-ctrl { display:flex; gap:8px; }
+.rep-btn  { width:46px; height:46px; border-radius:10px; border:none; font-size:26px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.rep-btn.minus { background:var(--border); color:var(--text); }
+.rep-btn.plus  { background:var(--accent); color:var(--bg); }
+.rep-btn:active { opacity:.7; }
+
+/* Timer controls */
+.tmr-ctrl { display:flex; gap:10px; width:100%; }
+.tc-btn { flex:1; padding:17px; border:none; border-radius:4px; font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; cursor:pointer; transition:transform .12s; user-select:none; }
+.tc-btn:active { transform:scale(.96); }
+.tc-play  { background:var(--accent); color:var(--bg); flex:2; }
+.tc-reset { background:var(--card); color:var(--text); border:1px solid var(--border); }
+.tc-skip  { background:var(--card); color:var(--green); border:1px solid #4eff9133; }
+
+/* DONE */
+#s-done { align-items:center; justify-content:center; padding:48px 24px; gap:24px; text-align:center; position:relative; overflow:hidden; }
+.done-glow { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at 50% 60%,#f5ff4e22 0%,transparent 65%); }
+.done-icon  { font-size:68px; animation:pop .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.done-title { font-family:'Bebas Neue',sans-serif; font-size:52px; line-height:.9; }
+.done-title em { color:var(--accent); font-style:normal; }
+.done-stats { display:flex; gap:12px; }
+.d-stat { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 20px; text-align:center; flex:1; }
+.d-stat-val { font-family:'Bebas Neue',sans-serif; font-size:34px; color:var(--accent); }
+.d-stat-lbl { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lb-close" onclick="closeLightbox()">✕</div>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="s-home" class="screen active">
+  <div class="home-noise"></div><div class="home-grid"></div>
+  <div class="home-inner">
+    <div class="badge">✦ SIN MÁQUINAS</div>
+    <div class="home-title">GYM<br><em>FLOW</em></div>
+    <p class="home-sub">Elige tus zonas, ajusta las reps y recibe ejercicios aleatorios con cronómetro integrado.</p>
+    <button class="btn btn-y" onclick="go('s-select')">COMENZAR</button>
+  </div>
+</div>
+
+<!-- ══ SELECT ══ -->
+<div id="s-select" class="screen">
+  <div class="top-bar">
+    <div class="back-btn" onclick="go('s-home')">←</div>
+    <div class="top-title">Tu sesión</div>
+  </div>
+  <div class="scr-body">
+    <div class="sec-lbl">¿Qué quieres trabajar hoy?</div>
+    <div class="parts-grid" id="parts-grid"></div>
+    <div class="sec-lbl">Ejercicios por sesión</div>
+    <div class="count-row">
+      <span class="count-label">Ejercicios</span>
+      <div class="count-ctrl">
+        <button class="cnt-btn" onclick="chgCount(-1)">−</button>
+        <span class="cnt-val" id="cnt-val">6</span>
+        <button class="cnt-btn" onclick="chgCount(1)">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn btn-y" id="start-btn" onclick="startWorkout()" disabled>GENERAR RUTINA</button>
+  </div>
+</div>
+
+<!-- ══ WORKOUT ══ -->
+<div id="s-workout" class="screen">
+  <div class="wo-header">
+    <div class="wo-meta">
+      <div class="wo-zones" id="wo-zones">—</div>
+      <div class="wo-count" id="wo-count">0 ejercicios</div>
+    </div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:100%"></div></div>
+  </div>
+  <div class="wo-list" id="wo-list"></div>
+  <div class="bottom-bar">
+    <button class="btn btn-g" onclick="go('s-select')">← VOLVER</button>
+    <button class="btn btn-y" style="flex:2" onclick="shuffleAgain()">OTRA RUTINA ↻</button>
+  </div>
+</div>
+
+<!-- ══ TIMER ══ -->
+<div id="s-timer" class="screen">
+  <div class="tmr-header">
+    <div class="back-btn" onclick="timerStop();go('s-workout')">←</div>
+    <div class="tmr-name" id="tmr-name">Ejercicio</div>
+  </div>
+  <div class="tmr-body">
+    <div class="cfg-row">
+      <div class="cfg-card">
+        <div class="cfg-lbl">Series</div>
+        <div class="cfg-ctrl">
+          <button class="cfg-btn" onclick="cfgChg('sets',-1)">−</button>
+          <span class="cfg-val" id="cfg-sets">4</span>
+          <button class="cfg-btn" onclick="cfgChg('sets',1)">+</button>
+        </div>
+      </div>
+      <div class="cfg-card">
+        <div class="cfg-lbl">Reps</div>
+        <div class="cfg-ctrl">
+          <button class="cfg-btn" onclick="cfgChg('reps',-1)">−</button>
+          <span class="cfg-val" id="cfg-reps">12</span>
+          <button class="cfg-btn" onclick="cfgChg('reps',1)">+</button>
+        </div>
+      </div>
+      <div class="cfg-card">
+        <div class="cfg-lbl">Descanso</div>
+        <div class="cfg-ctrl">
+          <button class="cfg-btn" onclick="cfgChg('rest',-5)">−</button>
+          <span class="cfg-val" id="cfg-rest">60</span>
+          <button class="cfg-btn" onclick="cfgChg('rest',5)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ring-wrap">
+      <svg width="220" height="220" viewBox="0 0 220 220">
+        <circle class="ring-bg"  cx="110" cy="110" r="100"/>
+        <circle class="ring-arc p-idle" id="ring-arc" cx="110" cy="110" r="100"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-phase" id="ring-phase">LISTO</div>
+        <div class="ring-time p-idle" id="ring-time">—</div>
+        <div class="ring-sub"  id="ring-sub">Configura y presiona Iniciar</div>
+      </div>
+    </div>
+
+    <div class="dots" id="dots"></div>
+
+    <div class="rep-wrap">
+      <div class="rep-left">
+        <div class="rep-lbl">Reps completadas</div>
+        <div class="rep-val" id="rep-val">0</div>
+      </div>
+      <div class="rep-ctrl">
+        <button class="rep-btn minus" onclick="repChg(-1)">−</button>
+        <button class="rep-btn plus"  onclick="repChg(1)">+</button>
+      </div>
+    </div>
+
+    <div class="tmr-ctrl">
+      <button class="tc-btn tc-reset" onclick="timerReset()">↺</button>
+      <button class="tc-btn tc-play"  id="tc-play" onclick="timerToggle()">▶ INICIAR</button>
+      <button class="tc-btn tc-skip"  onclick="timerSkip()">→ SKIP</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONE ══ -->
+<div id="s-done" class="screen">
+  <div class="done-glow"></div>
+  <div class="done-icon">🔥</div>
+  <div class="done-title">SESIÓN<br><em>LISTA</em></div>
+  <div class="done-stats" id="done-stats"></div>
+  <button class="btn btn-y" onclick="shuffleAgain()">OTRA RUTINA ↻</button>
+  <button class="btn btn-g" style="width:100%;max-width:320px" onclick="go('s-select')">CAMBIAR SELECCIÓN</button>
+</div>
+
+<script>
+/* ══════════ DATA (Omitted for brevity, using same EX as provided) ══════════ */
 const IMAGES = {
   Pecho_01:'img/Pecho_01.jpg',Pecho_02:'img/Pecho_02.jpg',Pecho_03:'img/Pecho_03.jpg',Pecho_04:'img/Pecho_04.jpg',Pecho_05:'img/Pecho_05.jpg',Pecho_06:'img/Pecho_06.jpg',Pecho_07:'img/Pecho_07.jpg',Pecho_08:'img/Pecho_08.jpg',Pecho_09:'img/Pecho_09.jpg',Pecho_10:'img/Pecho_10.jpg',Pecho_11:'img/Pecho_11.jpg',Pecho_12:'img/Pecho_12.jpg',
   Espalda_01:'img/Espalda_01.jpg',Espalda_02:'img/Espalda_02.jpg',Espalda_03:'img/Espalda_03.jpg',Espalda_04:'img/Espalda_04.jpg',Espalda_05:'img/Espalda_05.jpg',Espalda_06:'img/Espalda_06.jpg',Espalda_07:'img/Espalda_07.jpg',Espalda_08:'img/Espalda_08.jpg',Espalda_09:'img/Espalda_09.jpg',Espalda_10:'img/Espalda_10.jpg',Espalda_11:'img/Espalda_11.jpg',Espalda_12:'img/Espalda_12.jpg',
@@ -162,3 +508,261 @@ const EX = {
     {name:'Activación de Multífidos',     img:'Rehab_12',  eq:'Colchoneta',        sets:3,reps:'10', rest:45, lv:'Básico',   desc:'A cuatro patas, activa suavemente la musculatura profunda de la espalda sin movimiento externo visible.'},
   ],
 };
+
+
+// (Assume EX and IMAGES from your source are here)
+
+/* ══════════ STATE ══════════ */
+let selected = new Set();
+let exCount  = 6;
+let workout  = [];
+
+/* ══════════ NAV ══════════ */
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ══════════ VIDEO & LIGHTBOX ══════════ */
+function openLightbox(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox()   { document.getElementById('lightbox').classList.remove('open'); }
+
+/**
+ * Buscador In-App de YouTube
+ * Abre una ventana emergente que simula ser parte de la app.
+ */
+function searchYoutube(name, muscle) {
+  const query = encodeURIComponent(`ejercicio ${name} ${muscle} technique gym shorts`);
+  const url = `https://www.youtube.com/results?search_query=${query}`;
+  
+  // En móviles, window.open se abre como un "In-App Browser"
+  const width = 450;
+  const height = 800;
+  const left = (window.screen.width / 2) - (width / 2);
+  const top = (window.screen.height / 2) - (height / 2);
+  
+  window.open(url, 'GYMFLOW_VIDEO', `width=${width},height=${height},top=${top},left=${left},status=no,menubar=no,toolbar=no`);
+}
+
+/* ══════════ SELECT ══════════ */
+function buildGrid() {
+  const g = document.getElementById('parts-grid');
+  if(!g) return;
+  g.innerHTML = '';
+  PARTS.forEach(p => {
+    const c = document.createElement('div');
+    c.className = 'part-card' + (selected.has(p.id) ? ' on' : '');
+    c.innerHTML = `<div class="part-emoji">${p.emoji}</div><div class="part-name">${p.name}</div><div class="part-count">${EX[p.id].length} ejercicios</div>`;
+    c.onclick = () => {
+      selected.has(p.id) ? (selected.delete(p.id), c.classList.remove('on'))
+                         : (selected.add(p.id),    c.classList.add('on'));
+      document.getElementById('start-btn').disabled = !selected.size;
+    };
+    g.appendChild(c);
+  });
+}
+function chgCount(d) {
+  exCount = Math.max(1, Math.min(20, exCount+d));
+  document.getElementById('cnt-val').textContent = exCount;
+}
+
+/* ══════════ WORKOUT ══════════ */
+function getRandom() {
+  const pool = [];
+  selected.forEach(id => {
+    const name = PARTS.find(p=>p.id===id).name;
+    EX[id].forEach(e => pool.push({...e, muscle:name}));
+  });
+  for (let i=pool.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  return pool.slice(0, Math.min(exCount, pool.length));
+}
+function startWorkout() { workout=getRandom(); renderWorkout(); go('s-workout'); }
+function shuffleAgain() { workout=getRandom(); renderWorkout(); go('s-workout'); }
+
+function renderWorkout() {
+  const list = document.getElementById('wo-list');
+  list.innerHTML = '';
+  document.getElementById('wo-zones').textContent = [...selected].map(id=>PARTS.find(p=>p.id===id).name).join(' · ');
+  document.getElementById('wo-count').textContent = `${workout.length} ejercicios`;
+
+  workout.forEach((ex, i) => {
+    const src  = IMAGES[ex.img] || null;
+    const card = document.createElement('div');
+    card.className = 'ex-card';
+    card.style.animationDelay = `${i*55}ms`;
+
+    // Botón de YouTube integrado en el contenedor de imagen
+    const ytButtonHTML = `<button class="yt-overlay-btn" onclick="searchYoutube('${ex.name}', '${ex.muscle}')">▶ VER VIDEO</button>`;
+
+    const imgHTML = src
+      ? `<div class="ex-img-wrap">${ytButtonHTML}<img src="${src}" alt="${ex.name}" onclick="openLightbox('${src}')" loading="lazy"><div class="img-hint">toca para ampliar</div></div>`
+      : `<div class="ex-no-img">${ytButtonHTML} SIN IMAGEN</div>`;
+
+    card.innerHTML = `
+      <div class="ex-head">
+        <div class="ex-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="ex-meta">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-tags">
+            <span class="tag tag-eq">${ex.eq}</span>
+            <span class="tag tag-mu">${ex.muscle}</span>
+            <span class="tag tag-lv">${ex.lv}</span>
+          </div>
+        </div>
+      </div>
+      ${imgHTML}
+      <div class="ex-desc">${ex.desc}</div>
+      <div class="ex-stats">
+        <div class="stat-pill"><strong>${ex.sets}</strong>Series</div>
+        <div class="stat-pill"><strong>${ex.reps}</strong>Reps</div>
+        <div class="stat-pill"><strong>${ex.rest}s</strong>Descanso</div>
+      </div>
+      <button class="ex-timer-btn"
+        data-name="${ex.name}" data-sets="${ex.sets}"
+        data-reps="${ex.reps}" data-rest="${ex.rest}"
+        onclick="openTimer(this)">
+        ⏱&nbsp;&nbsp;INICIAR CRONÓMETRO
+      </button>`;
+    list.appendChild(card);
+  });
+
+  document.getElementById('done-stats').innerHTML = `
+    <div class="d-stat"><div class="d-stat-val">${workout.length}</div><div class="d-stat-lbl">Ejercicios</div></div>
+    <div class="d-stat"><div class="d-stat-val">${selected.size}</div><div class="d-stat-lbl">Zonas</div></div>`;
+}
+
+/* ══════════ TIMER LOGIC (Omitted but stays same as your index (5).html) ══════════ */
+const CIRC = 628.318;
+let T = { tid:null, running:false, phase:'idle', rem:0, total:0, serie:0 };
+let cfgSets=4, cfgReps=12, cfgRest=60;
+
+function openTimer(btn) {
+  timerStop();
+  cfgSets = parseInt(btn.dataset.sets)||4;
+  cfgReps = parseInt(btn.dataset.reps)||12;
+  cfgRest = parseInt(btn.dataset.rest)||60;
+  document.getElementById('tmr-name').textContent = btn.dataset.name;
+  document.getElementById('cfg-sets').textContent = cfgSets;
+  document.getElementById('cfg-reps').textContent = cfgReps;
+  document.getElementById('cfg-rest').textContent = cfgRest;
+  timerReset();
+  go('s-timer');
+}
+
+function cfgChg(key, d) {
+  if (key==='sets'){ cfgSets=Math.max(1,Math.min(10,cfgSets+d)); document.getElementById('cfg-sets').textContent=cfgSets; }
+  if (key==='reps'){ cfgReps=Math.max(1,Math.min(60,cfgReps+d)); document.getElementById('cfg-reps').textContent=cfgReps; }
+  if (key==='rest'){ cfgRest=Math.max(5,Math.min(300,cfgRest+d)); document.getElementById('cfg-rest').textContent=cfgRest; }
+  if (T.phase==='idle') timerReset();
+}
+
+function repChg(d) {
+  const el=document.getElementById('rep-val');
+  el.textContent=Math.max(0,parseInt(el.textContent)+d);
+}
+
+function timerReset() {
+  timerStop();
+  T={tid:null,running:false,phase:'idle',rem:0,total:0,serie:0};
+  document.getElementById('rep-val').textContent='0';
+  document.getElementById('tc-play').textContent='▶ INICIAR';
+  buildDots();
+  ringIdle();
+}
+
+function timerToggle() {
+  if (T.phase==='done')  { timerReset(); return; }
+  if (T.running)         { timerPause(); return; }
+  if (T.phase==='idle')  { doWork();     return; }
+  timerResume();
+}
+
+function timerPause()  { clearInterval(T.tid); T.running=false; document.getElementById('tc-play').textContent='▶ CONTINUAR'; }
+function timerResume() { T.running=true; document.getElementById('tc-play').textContent='⏸ PAUSAR'; if(T.phase==='rest') tick(); }
+function timerStop()   { clearInterval(T.tid); T.running=false; T.phase='idle'; }
+
+function timerSkip() {
+  clearInterval(T.tid);
+  if (T.phase==='idle') { doWork(); return; }
+  if (T.phase==='work') { markDot(T.serie-1,'d-done'); doRest(); return; }
+  if (T.phase==='rest') { T.serie>=cfgSets ? timerDone() : doWork(); }
+}
+
+function doWork() {
+  T.serie++; T.phase='work'; T.running=true;
+  document.getElementById('tc-play').textContent='⏸ PAUSAR';
+  document.getElementById('rep-val').textContent='0';
+  updateDots();
+  setRing('p-work', 1, 1);
+  setCenter('p-work', `SERIE ${T.serie} DE ${cfgSets}`, cfgReps, 'Haz las reps → luego toca SKIP');
+}
+
+function doRest() {
+  T.phase='rest'; T.rem=cfgRest; T.total=cfgRest; T.running=true;
+  document.getElementById('tc-play').textContent='⏸ PAUSAR';
+  setRing('p-rest', cfgRest, cfgRest);
+  setCenter('p-rest','DESCANSO', fmt(cfgRest), `Serie ${T.serie} de ${cfgSets} completada ✓`);
+  tick();
+}
+
+function tick() {
+  T.tid = setInterval(()=>{
+    if(!T.running) return;
+    T.rem--;
+    setRing('p-rest', T.rem, T.total);
+    setCenter('p-rest','DESCANSO', fmt(T.rem), `Serie ${T.serie} de ${cfgSets}`);
+    if(T.rem<=0){
+      clearInterval(T.tid);
+      T.serie>=cfgSets ? timerDone() : doWork();
+    }
+  },1000);
+}
+
+function timerDone() {
+  T.phase='done'; T.running=false; clearInterval(T.tid);
+  setRing('p-done',1,1);
+  setCenter('p-done','¡COMPLETADO!','✓',`${cfgSets} series listas 🔥`);
+  document.getElementById('tc-play').textContent='↺ REINICIAR';
+  if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+}
+
+function ringIdle() {
+  setRing('p-idle',1,1);
+  setCenter('p-idle','LISTO','—',`${cfgSets} series · ${cfgReps} reps · ${cfgRest}s descanso`);
+}
+
+function setRing(phase, rem, total) {
+  const arc=document.getElementById('ring-arc');
+  arc.className=`ring-arc ${phase}`;
+  arc.style.strokeDashoffset = CIRC*(1-(total>0?rem/total:0));
+}
+
+function setCenter(phase, phaseLabel, timeVal, sub) {
+  document.getElementById('ring-phase').textContent=phaseLabel;
+  const t=document.getElementById('ring-time');
+  t.textContent=timeVal;
+  t.className=`ring-time ${phase}`;
+  document.getElementById('ring-sub').textContent=sub;
+}
+
+function fmt(s){ return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+
+function buildDots() {
+  const el=document.getElementById('dots'); if(!el) return; el.innerHTML='';
+  for(let i=0;i<cfgSets;i++){ const d=document.createElement('div'); d.className='dot'; d.id=`dot-${i}`; el.appendChild(d); }
+}
+function updateDots() {
+  for(let i=0;i<cfgSets;i++){
+    const d=document.getElementById(`dot-${i}`);
+    if(d) d.className='dot'+(i<T.serie-1?' d-done':i===T.serie-1?' d-active':'');
+  }
+}
+function markDot(i,cls){ const d=document.getElementById(`dot-${i}`); if(d) d.className=`dot ${cls}`; }
+
+/* ══════════ INIT ══════════ */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+buildGrid();
+</script>
+</body>
+</html>
