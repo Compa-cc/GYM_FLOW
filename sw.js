@@ -1,17 +1,9 @@
-// ─── VERSIÓN DEL CACHE ───────────────────────────────────────────────────────
-// Cambia este número cada vez que subas cambios a GitHub.
-// El SW detectará la nueva versión, descargará los archivos frescos
-// y notificará a la app para que se recargue automáticamente.
-const CACHE_VERSION = 'GYM FLOW-v2';
-
+const CACHE_NAME = 'gym-flow-v2';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'
+  './img/Pecho_01.jpg', // Agrega aquí los nombres de tus fotos principales
+  './manifest.json'
 ];
 
 // INSTALL: precachea todos los assets con la nueva versión
