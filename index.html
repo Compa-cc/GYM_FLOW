@@ -344,7 +344,6 @@ body { min-height:100%; background:var(--bg); color:var(--text); font-family:'DM
 
 <script>
   
-/* ══════════ DATA (Omitted for brevity, using same EX as provided) ══════════ */
 const IMAGES = {
   Pecho_01:'img/Pecho_01.jpg',Pecho_02:'img/Pecho_02.jpg',Pecho_03:'img/Pecho_03.jpg',Pecho_04:'img/Pecho_04.jpg',Pecho_05:'img/Pecho_05.jpg',Pecho_06:'img/Pecho_06.jpg',Pecho_07:'img/Pecho_07.jpg',Pecho_08:'img/Pecho_08.jpg',Pecho_09:'img/Pecho_09.jpg',Pecho_10:'img/Pecho_10.jpg',Pecho_11:'img/Pecho_11.jpg',Pecho_12:'img/Pecho_12.jpg',
   Espalda_01:'img/Espalda_01.jpg',Espalda_02:'img/Espalda_02.jpg',Espalda_03:'img/Espalda_03.jpg',Espalda_04:'img/Espalda_04.jpg',Espalda_05:'img/Espalda_05.jpg',Espalda_06:'img/Espalda_06.jpg',Espalda_07:'img/Espalda_07.jpg',Espalda_08:'img/Espalda_08.jpg',Espalda_09:'img/Espalda_09.jpg',Espalda_10:'img/Espalda_10.jpg',Espalda_11:'img/Espalda_11.jpg',Espalda_12:'img/Espalda_12.jpg',
@@ -510,9 +509,6 @@ const EX = {
   ],
 };
 
-
-// (Assume EX and IMAGES from your source are here)
-
 /* ══════════ STATE ══════════ */
 let selected = new Set();
 let exCount  = 6;
@@ -524,6 +520,7 @@ function go(id) {
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
+
 
 /* ══════════ VIDEO & LIGHTBOX ══════════ */
 function openLightbox(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').classList.add('open'); }
@@ -762,6 +759,9 @@ function updateDots() {
 function markDot(i,cls){ const d=document.getElementById(`dot-${i}`); if(d) d.className=`dot ${cls}`; }
 
 /* ══════════ INIT ══════════ */
+
+buildGrid();
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
 
