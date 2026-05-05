@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gym-flow-v3'; // ⚠️ cambia esto en cada deploy
+const CACHE_VERSION = 'gym-flow-v4'; // ⚠️ cambia esto en cada deploy
 const ASSETS = [
   './',
   './index.html',
