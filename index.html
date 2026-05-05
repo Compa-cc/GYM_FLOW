@@ -346,16 +346,14 @@ body { min-height:100%; background:var(--bg); color:var(--text); font-family:'DM
 
   // ── Service Worker + auto-update ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
-      nw.addEventListener('statechange', () => {
-        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-          document.getElementById('update-banner').classList.add('show');
-        }
-      });
-    });
-  }).catch(() => {});
+  navigator.serviceWorker.register('./sw.js');
+
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SW_UPDATED') {
+      window.location.reload();
+    }
+  });
+}
 
   // El SW nos avisa cuando ya está activo (post skipWaiting)
   navigator.serviceWorker.addEventListener('message', e => {
