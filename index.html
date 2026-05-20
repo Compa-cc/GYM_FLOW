@@ -218,6 +218,9 @@ body { min-height:100%; background:var(--bg); color:var(--text); font-family:'DM
 <div id="s-home" class="screen active">
   <div class="home-noise"></div><div class="home-grid"></div>
   <div class="home-inner">
+    <div id="app-version" style="font-size: 11px; color: var(--muted); text-align: center; margin-top: 15px; font-family: sans-serif; letter-spacing: 1px;">
+  Detectando versión...
+</div>
     <div class="badge">✦ SIN MÁQUINAS</div>
     <div class="home-title">GYM<br><em>FLOW</em></div>
     <p class="home-sub">Elige tus zonas, ajusta las reps y recibe ejercicios aleatorios con cronómetro integrado.</p>
@@ -343,6 +346,8 @@ body { min-height:100%; background:var(--bg); color:var(--text); font-family:'DM
 </div>
 
 <script>
+
+  
   
 const IMAGES = {
   Pecho_01:'img/Pecho_01.jpg',Pecho_02:'img/Pecho_02.jpg',Pecho_03:'img/Pecho_03.jpg',Pecho_04:'img/Pecho_04.jpg',Pecho_05:'img/Pecho_05.jpg',Pecho_06:'img/Pecho_06.jpg',Pecho_07:'img/Pecho_07.jpg',Pecho_08:'img/Pecho_08.jpg',Pecho_09:'img/Pecho_09.jpg',Pecho_10:'img/Pecho_10.jpg',Pecho_11:'img/Pecho_11.jpg',Pecho_12:'img/Pecho_12.jpg',
@@ -762,6 +767,49 @@ function markDot(i,cls){ const d=document.getElementById(`dot-${i}`); if(d) d.cl
 
 buildGrid();
 
+// 🔥 NUEVO: Función para consultar la versión real del Service Worker
+function checkActiveVersion() {
+  fetch('./get-version')
+    .then(res => res.text())
+    .then(version => {
+      document.getElementById('app-version').textContent = `VERSIÓN ACTIVA: ${version.toUpperCase()}`;
+    })
+    .catch(() => {
+      document.getElementById('app-version').textContent = 'MODO DESARROLLO (SIN CONEXIÓN)';
+    });
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // Si el Service Worker ya está controlando la app, verificamos versión de una vez
+    if (navigator.serviceWorker.controller) {
+      checkActiveVersion();
+    }
+
+    // Detecta si hay una nueva versión lista en GitHub esperando activarse
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Forzar la recarga para que el usuario vea el cambio en el acto
+          window.location.reload();
+        }
+      });
+    });
+  });
+
+  // Si cambia el controlador (se activa el nuevo sw.js), recargamos la interfaz
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      window.location.reload();
+      refreshing = true;
+    }
+  });
+} else {
+  document.getElementById('app-version').textContent = 'PWA NO SOPORTADA';
+}
+  
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
     // 🔥 Detecta si hay una nueva versión esperando para activarse
