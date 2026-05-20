@@ -764,20 +764,25 @@ buildGrid();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
-
-    // 🔥 detecta nueva versión
-    reg.onupdatefound = () => {
+    // 🔥 Detecta si hay una nueva versión esperando para activarse
+    reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
-
-      newWorker.onstatechange = () => {
-        if (newWorker.state === 'installed') {
-          if (navigator.serviceWorker.controller) {
-            // nueva versión disponible → recarga
-            window.location.reload();
-          }
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Hay cambios listos, forzamos recarga inmediata
+          window.location.reload();
         }
-      };
-    };
+      });
+    });
+  });
+
+  // Asegura que el nuevo service worker tome el control de la pestaña actual al activarse
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      window.location.reload();
+      refreshing = true;
+    }
   });
 }
 </script>
