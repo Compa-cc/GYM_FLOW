@@ -791,40 +791,25 @@ function checkActiveVersion() {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
-    // Si ya hay un controlador activo, pide la versión de inmediato
-    if (navigator.serviceWorker.controller) {
-      checkActiveVersion();
-    } else {
-      // Si es la primera vez que se instala, espera a que esté listo y consulta
-      navigator.serviceWorker.ready.then(() => {
-        checkActiveVersion();
-      });
-    }
-
-    // Detecta si hay una nueva versión esperando en GitHub
     reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      if (newWorker) {
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Forzar recarga inmediata para aplicar cambios
-            window.location.reload();
-          }
-        });
-      }
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          document.getElementById('update-banner').classList.add('show');
+        }
+      });
     });
-  });
+  }).catch(() => {});
 
-  // Si el Service Worker cambia y toma el control, recarga para actualizar la interfaz
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      window.location.reload();
-      refreshing = true;
+  // El SW nos avisa cuando ya está activo (post skipWaiting)
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'SW_UPDATED') {
+      document.getElementById('update-banner').classList.add('show');
     }
   });
-} else {
-  document.getElementById('app-version').textContent = 'PWA NO SOPORTADA';
+}
+function applyUpdate() {
+  window.location.reload();
 }
 </script>
 </body>
