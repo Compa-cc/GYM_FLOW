@@ -767,38 +767,49 @@ function markDot(i,cls){ const d=document.getElementById(`dot-${i}`); if(d) d.cl
 
 buildGrid();
 
-// 🔥 NUEVO: Función para consultar la versión real del Service Worker
+// Función para consultar la versión real del Service Worker
 function checkActiveVersion() {
   fetch('./get-version')
-    .then(res => res.text())
+    .then(res => {
+      if (!res.ok) throw new Error();
+      return res.text();
+    })
     .then(version => {
       document.getElementById('app-version').textContent = `VERSIÓN ACTIVA: ${version.toUpperCase()}`;
     })
     .catch(() => {
-      document.getElementById('app-version').textContent = 'MODO DESARROLLO (SIN CONEXIÓN)';
+      // Si falla porque el SW aún está instalándose en el primer render, reintentamos en 1 segundo
+      setTimeout(checkActiveVersion, 1000);
     });
 }
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
-    // Si el Service Worker ya está controlando la app, verificamos versión de una vez
+    // Si ya hay un controlador activo, pide la versión de inmediato
     if (navigator.serviceWorker.controller) {
       checkActiveVersion();
+    } else {
+      // Si es la primera vez que se instala, espera a que esté listo y consulta
+      navigator.serviceWorker.ready.then(() => {
+        checkActiveVersion();
+      });
     }
 
-    // Detecta si hay una nueva versión lista en GitHub esperando activarse
+    // Detecta si hay una nueva versión esperando en GitHub
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // Forzar la recarga para que el usuario vea el cambio en el acto
-          window.location.reload();
-        }
-      });
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Forzar recarga inmediata para aplicar cambios
+            window.location.reload();
+          }
+        });
+      }
     });
   });
 
-  // Si cambia el controlador (se activa el nuevo sw.js), recargamos la interfaz
+  // Si el Service Worker cambia y toma el control, recarga para actualizar la interfaz
   let refreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!refreshing) {
@@ -808,30 +819,6 @@ if ('serviceWorker' in navigator) {
   });
 } else {
   document.getElementById('app-version').textContent = 'PWA NO SOPORTADA';
-}
-  
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    // 🔥 Detecta si hay una nueva versión esperando para activarse
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // Hay cambios listos, forzamos recarga inmediata
-          window.location.reload();
-        }
-      });
-    });
-  });
-
-  // Asegura que el nuevo service worker tome el control de la pestaña actual al activarse
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      window.location.reload();
-      refreshing = true;
-    }
-  });
 }
 </script>
 </body>
