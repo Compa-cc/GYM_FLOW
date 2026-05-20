@@ -37,6 +37,12 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
   const url = new URL(e.request.url);
+
+  // 🔥 NUEVO: Si la app consulta por la versión, responde directamente
+  if (url.pathname.endsWith('/get-version')) {
+    e.respondWith(new Response(CACHE_VERSION, { headers: { 'Content-Type': 'text/plain' } }));
+    return;
+  }
   const isHTML = e.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname === '/';
 
   if (isHTML) {
