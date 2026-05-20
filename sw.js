@@ -7,67 +7,69 @@ const ASSETS = [
   './img/icon1.png',
 ];
 
-// INSTALL → precarga y fuerza activación inmediata
+// INSTALL: precachea todos los assets con la nueva versión
 self.addEventListener('install', e => {
-  self.skipWaiting(); // 🔥 activa inmediatamente
-
   e.waitUntil(
     caches.open(CACHE_VERSION)
-      .then(cache => cache.addAll(ASSETS))
+      .then(c => Promise.allSettled(ASSETS.map(url => c.add(url).catch(() => {}))))
+      .then(() => self.skipWaiting())  // activa inmediatamente sin esperar
   );
 });
 
-// ACTIVATE → limpia versiones viejas
+// ACTIVATE: borra caches viejos (de versiones anteriores), nunca toca localStorage
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_VERSION) {
-            return caches.delete(key);
-          }
-        })
-      )
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
+      .then(() => {
+        // Notifica a todos los tabs abiertos que hay una nueva versión
+        self.clients.matchAll({ type: 'window' }).then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
+        });
+      })
   );
 });
 
-// FETCH → Estrategia Network First para HTML y Stale-While-Revalidate para Assets
+// FETCH: network-first para HTML (siempre fresco), cache-first para assets
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
   const url = new URL(e.request.url);
 
-  // 🔥 NUEVO: Si la app consulta por la versión, responde directamente
-  if (url.pathname.endsWith('/get-version')) {
-    e.respondWith(new Response(CACHE_VERSION, { headers: { 'Content-Type': 'text/plain' } }));
-    return;
+  // Overpass API y otros servicios externos de datos: siempre red, nunca caché
+  if (url.hostname.includes('overpass-api.de') || url.hostname.includes('overpass.kumi.systems')) {
+    return; // deja pasar sin interceptar
   }
+
   const isHTML = e.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname === '/';
 
   if (isHTML) {
-    // 🔥 Clonamos la petición para evitar conflictos de CORS en GitHub Pages
+    // HTML: intenta red primero, cae a cache si sin conexión
     e.respondWith(
-      fetch(e.request, { cache: 'no-store' }) // Evita que el navegador use caché interno
+      fetch(e.request)
         .then(res => {
-          if (!res || res.status !== 200) return res;
-          const clone = res.clone();
-          caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(e.request)) // Si no hay internet, usa el caché
-    );
-  } else {
-    // Para imágenes, fuentes y estilos: Cache First + actualización en background
-    e.respondWith(
-      caches.match(e.request).then(cached => {
-        const fetchPromise = fetch(e.request).then(res => {
-          if (res && res.status === 200) {
+          if (res.ok) {
             const clone = res.clone();
             caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
           }
           return res;
-        }).catch(() => null);
+        })
+        .catch(() => caches.match(e.request))
+    );
+  } else {
+    // Assets (JS, CSS, fonts, images): cache-first, actualiza en background
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        const fetchPromise = fetch(e.request).then(res => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
+          }
+          return res;
+        }).catch(() => cached);
         return cached || fetchPromise;
       })
     );
