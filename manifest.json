@@ -1,11 +1,12 @@
 {
   "name": "Gym Flow - Tracker",
   "short_name": "Gym Flow",
-  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#0a0a0f",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "lang": "es",
   "icons": [
     {
       "src": "img/icon.png",
@@ -18,4 +19,5 @@
       "type": "image/png"
     }
   ]
+  "categories": ["utilities", "lifestyle"]
 }
