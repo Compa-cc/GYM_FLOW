@@ -3,8 +3,8 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './img/icon-192.png',
-  './img/icon-512.png',
+  './img/icon.png',
+  './img/icon1.png',
 ];
 
 // INSTALL → precarga y fuerza activación inmediata
